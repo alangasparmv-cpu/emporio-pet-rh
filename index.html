@@ -20,44 +20,440 @@
     </div>
 
     <div class="card hidden" id="panel">
-      <h2>Painel</h2>
+      <div class="panel-header">
+        <h2>Cadastro de Funcionário</h2>
+        <div class="panel-actions">
+          <button class="secondary" onclick="loadEmployees()">Atualizar lista</button>
+          <button class="secondary" onclick="logout()">Sair</button>
+        </div>
+      </div>
 
-      <h3>Cadastrar funcionário</h3>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="dados-pessoais" onclick="showTab('dados-pessoais', event)">Dados pessoais</button>
+        <button class="tab-btn" data-tab="documentos" onclick="showTab('documentos', event)">Documentos</button>
+        <button class="tab-btn" data-tab="endereco" onclick="showTab('endereco', event)">Endereço</button>
+        <button class="tab-btn" data-tab="contato" onclick="showTab('contato', event)">Contato</button>
+        <button class="tab-btn" data-tab="trabalho" onclick="showTab('trabalho', event)">Dados trabalhistas</button>
+        <button class="tab-btn" data-tab="dependentes" onclick="showTab('dependentes', event)">Dependentes</button>
+        <button class="tab-btn" data-tab="observacoes" onclick="showTab('observacoes', event)">Observações</button>
+      </div>
 
-      <input id="full_name" type="text" placeholder="Nome completo *" />
-      <input id="birth_date" type="date" placeholder="Data de nascimento" />
-      <input id="cpf" type="text" placeholder="CPF *" maxlength="14" />
-      <input id="rg" type="text" placeholder="RG *" maxlength="15" />
+      <div class="tab-content active" id="dados-pessoais">
+        <div class="grid two-cols">
+          <div class="field full">
+            <label for="full_name">Nome completo *</label>
+            <input id="full_name" type="text" />
+          </div>
 
-      <input id="cep" type="text" placeholder="CEP" maxlength="9" />
-      <input id="address" type="text" placeholder="Endereço" />
-      <input id="address_number" type="text" placeholder="Número" />
-      <input id="address_complement" type="text" placeholder="Complemento" />
-      <input id="neighborhood" type="text" placeholder="Bairro" />
-      <input id="city" type="text" placeholder="Cidade *" />
-      <input id="state" type="text" placeholder="UF *" maxlength="2" />
+          <div class="field full">
+            <label for="social_name">Nome social</label>
+            <input id="social_name" type="text" />
+          </div>
 
-      <input id="phone" type="text" placeholder="Telefone" maxlength="14" />
-      <input id="mobile" type="text" placeholder="Celular" maxlength="15" />
+          <div class="field">
+            <label for="birth_date">Data de nascimento *</label>
+            <input id="birth_date" type="date" />
+          </div>
 
-      <input id="role" type="text" placeholder="Cargo / Função *" list="roles_list" />
-      <datalist id="roles_list"></datalist>
+          <div class="field">
+            <label for="cpf">CPF *</label>
+            <input id="cpf" type="text" maxlength="14" placeholder="000.000.000-00" />
+          </div>
 
-      <input id="admission_date" type="date" placeholder="Data de admissão" />
-      <input id="ctps_number" type="text" placeholder="CTPS número *" />
-      <input id="ctps_series" type="text" placeholder="CTPS série *" />
+          <div class="field">
+            <label for="rg">RG *</label>
+            <input id="rg" type="text" maxlength="15" placeholder="00.000.000-0" />
+          </div>
 
-      <button onclick="saveEmployee()">Salvar funcionário</button>
+          <div class="field">
+            <label for="rg_issue_date">Data de emissão do RG</label>
+            <input id="rg_issue_date" type="date" />
+          </div>
 
-      <p id="employeeMsg"></p>
+          <div class="field">
+            <label for="rg_issuer">Órgão emissor</label>
+            <input id="rg_issuer" type="text" />
+          </div>
 
-      <hr style="margin: 24px 0;">
+          <div class="field">
+            <label for="rg_issuer_state">UF do RG</label>
+            <input id="rg_issuer_state" type="text" maxlength="2" />
+          </div>
+
+          <div class="field full">
+            <label for="mother_name">Nome da mãe *</label>
+            <input id="mother_name" type="text" />
+          </div>
+
+          <div class="field full">
+            <label for="father_name">Nome do pai</label>
+            <input id="father_name" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="nationality">Nacionalidade *</label>
+            <input id="nationality" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="birthplace">Naturalidade *</label>
+            <input id="birthplace" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="marital_status">Estado civil *</label>
+            <select id="marital_status">
+              <option value="">Selecione</option>
+              <option>Solteiro(a)</option>
+              <option>Casado(a)</option>
+              <option>Divorciado(a)</option>
+              <option>Separado(a)</option>
+              <option>Viúvo(a)</option>
+              <option>União estável</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="education_level">Grau de instrução</label>
+            <select id="education_level">
+              <option value="">Selecione</option>
+              <option>Fundamental incompleto</option>
+              <option>Fundamental completo</option>
+              <option>Médio incompleto</option>
+              <option>Médio completo</option>
+              <option>Superior incompleto</option>
+              <option>Superior completo</option>
+              <option>Pós-graduação</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="ethnicity">Raça / etnia</label>
+            <select id="ethnicity">
+              <option value="">Selecione</option>
+              <option>Branca</option>
+              <option>Preta</option>
+              <option>Parda</option>
+              <option>Amarela</option>
+              <option>Indígena</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="first_job">Primeiro emprego</label>
+            <select id="first_job">
+              <option value="">Selecione</option>
+              <option value="true">Sim</option>
+              <option value="false">Não</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="retired">Aposentado</label>
+            <select id="retired">
+              <option value="">Selecione</option>
+              <option value="true">Sim</option>
+              <option value="false">Não</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="disability">Pessoa com deficiência</label>
+            <select id="disability">
+              <option value="">Selecione</option>
+              <option value="true">Sim</option>
+              <option value="false">Não</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label for="disability_description">Qual deficiência</label>
+            <input id="disability_description" type="text" />
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="documentos">
+        <div class="grid two-cols">
+          <div class="field">
+            <label for="ctps_number">CTPS número *</label>
+            <input id="ctps_number" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="ctps_series">CTPS série *</label>
+            <input id="ctps_series" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="ctps_state">UF da CTPS</label>
+            <input id="ctps_state" type="text" maxlength="2" />
+          </div>
+
+          <div class="field">
+            <label for="ctps_issue_date">Data emissão da CTPS</label>
+            <input id="ctps_issue_date" type="date" />
+          </div>
+
+          <div class="field">
+            <label for="pis_nis">PIS / NIS</label>
+            <input id="pis_nis" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="voter_title">Título de eleitor</label>
+            <input id="voter_title" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="voter_zone">Zona eleitoral</label>
+            <input id="voter_zone" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="voter_section">Seção eleitoral</label>
+            <input id="voter_section" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="reservist_certificate">Certificado de reservista</label>
+            <input id="reservist_certificate" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="reservist_category">Categoria reservista</label>
+            <input id="reservist_category" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="cnh_number">Número CNH</label>
+            <input id="cnh_number" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="cnh_category">Categoria CNH</label>
+            <input id="cnh_category" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="cnh_issue_date">Data expedição CNH</label>
+            <input id="cnh_issue_date" type="date" />
+          </div>
+
+          <div class="field">
+            <label for="cnh_expiry_date">Validade CNH</label>
+            <input id="cnh_expiry_date" type="date" />
+          </div>
+
+          <div class="field">
+            <label for="first_license_date">Data 1ª habilitação</label>
+            <input id="first_license_date" type="date" />
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="endereco">
+        <div class="grid two-cols">
+          <div class="field">
+            <label for="zip_code">CEP *</label>
+            <input id="zip_code" type="text" maxlength="9" placeholder="00000-000" />
+          </div>
+
+          <div class="field full">
+            <label for="address">Endereço *</label>
+            <input id="address" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="address_number">Número *</label>
+            <input id="address_number" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="address_complement">Complemento</label>
+            <input id="address_complement" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="neighborhood">Bairro *</label>
+            <input id="neighborhood" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="city">Cidade *</label>
+            <input id="city" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="state">UF *</label>
+            <input id="state" type="text" maxlength="2" />
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="contato">
+        <div class="grid two-cols">
+          <div class="field">
+            <label for="phone">Telefone</label>
+            <input id="phone" type="text" maxlength="14" placeholder="(00) 0000-0000" />
+          </div>
+
+          <div class="field">
+            <label for="mobile">Celular</label>
+            <input id="mobile" type="text" maxlength="15" placeholder="(00) 00000-0000" />
+          </div>
+
+          <div class="field full">
+            <label for="personal_email">E-mail particular</label>
+            <input id="personal_email" type="email" />
+          </div>
+
+          <div class="field full">
+            <label for="contact_message_phone">Telefone para recado</label>
+            <input id="contact_message_phone" type="text" />
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="trabalho">
+        <div class="grid two-cols">
+          <div class="field">
+            <label for="role">Cargo / função *</label>
+            <input id="role" type="text" list="roles_list" />
+            <datalist id="roles_list"></datalist>
+          </div>
+
+          <div class="field">
+            <label for="admission_date">Data de admissão *</label>
+            <input id="admission_date" type="date" />
+          </div>
+
+          <div class="field">
+            <label for="salary_amount">Salário contratual</label>
+            <input id="salary_amount" type="number" step="0.01" />
+          </div>
+
+          <div class="field">
+            <label for="salary_type">Tipo de salário</label>
+            <select id="salary_type">
+              <option value="">Selecione</option>
+              <option value="Mensal">Mensal</option>
+              <option value="Horista">Horista</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="sector">Setor</label>
+            <input id="sector" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="supervisor">Supervisor / responsável</label>
+            <input id="supervisor" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="work_schedule">Jornada de trabalho</label>
+            <input id="work_schedule" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="work_shift">Horário / escala</label>
+            <input id="work_shift" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="trial_contract">Contrato de experiência</label>
+            <select id="trial_contract">
+              <option value="">Selecione</option>
+              <option value="true">Sim</option>
+              <option value="false">Não</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="trial_days">Dias do contrato</label>
+            <input id="trial_days" type="number" />
+          </div>
+
+          <div class="field">
+            <label for="extension_days">Prorrogação (dias)</label>
+            <input id="extension_days" type="number" />
+          </div>
+
+          <div class="field">
+            <label for="trial_end_date">Data final do contrato</label>
+            <input id="trial_end_date" type="date" />
+          </div>
+
+          <div class="field">
+            <label for="transport_voucher">Usa vale-transporte</label>
+            <select id="transport_voucher">
+              <option value="">Selecione</option>
+              <option value="true">Sim</option>
+              <option value="false">Não</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="transport_per_day">Quantos por dia</label>
+            <input id="transport_per_day" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="transport_type">Tipo de transporte</label>
+            <select id="transport_type">
+              <option value="">Selecione</option>
+              <option value="Urbano">Urbano</option>
+              <option value="Suburbano">Suburbano</option>
+              <option value="Intermunicipal">Intermunicipal</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="dependentes">
+        <div class="grid two-cols">
+          <div class="field">
+            <label for="dependents_count">Quantidade de dependentes</label>
+            <input id="dependents_count" type="number" min="0" />
+          </div>
+
+          <div class="field full">
+            <label for="dependents">Dependentes / detalhes</label>
+            <textarea id="dependents" rows="6" placeholder="Ex.: Nome - data de nascimento - parentesco - CPF"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="observacoes">
+        <div class="grid two-cols">
+          <div class="field full">
+            <label for="observations">Observações</label>
+            <textarea id="observations" rows="7"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="registration_date">Data do cadastro</label>
+            <input id="registration_date" type="date" />
+          </div>
+
+          <div class="field">
+            <label for="registration_responsible">Responsável pelo cadastro</label>
+            <input id="registration_responsible" type="text" />
+          </div>
+        </div>
+      </div>
+
+      <div class="save-bar">
+        <button onclick="saveEmployee()">Salvar funcionário</button>
+        <p id="employeeMsg"></p>
+      </div>
+
+      <hr>
 
       <h3>Funcionários cadastrados</h3>
-      <button onclick="loadEmployees()">Atualizar lista</button>
       <pre id="result"></pre>
-
-      <button onclick="logout()">Sair</button>
     </div>
   </div>
 
@@ -65,11 +461,35 @@
     const SUPABASE_URL = "https://xqikfrufphwaqmfuexvx.supabase.co";
     const SUPABASE_KEY = "sb_publishable__-5ZX8k6kNTwQH5dvZxvMA_xVCX7-Up";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const ROLE_STORAGE_KEY = "emporio_pet_rh_roles_v2";
 
-    const ROLE_STORAGE_KEY = "emporio_pet_rh_roles";
+    function showTab(tabId, event) {
+      document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.getElementById(tabId).classList.add("active");
+      if (event) event.currentTarget.classList.add("active");
+    }
 
     function onlyDigits(value) {
       return value.replace(/\D/g, "");
+    }
+
+    function toNullableBoolean(value) {
+      if (value === "true") return true;
+      if (value === "false") return false;
+      return null;
+    }
+
+    function toNullableInteger(value) {
+      if (value === "" || value === null || value === undefined) return null;
+      const n = parseInt(value, 10);
+      return Number.isNaN(n) ? null : n;
+    }
+
+    function toNullableNumber(value) {
+      if (value === "" || value === null || value === undefined) return null;
+      const n = parseFloat(value);
+      return Number.isNaN(n) ? null : n;
     }
 
     function maskCPF(value) {
@@ -86,17 +506,13 @@
       if (/^(\d)\1+$/.test(cpf)) return false;
 
       let sum = 0;
-      for (let i = 0; i < 9; i++) {
-        sum += parseInt(cpf.charAt(i)) * (10 - i);
-      }
+      for (let i = 0; i < 9; i++) sum += parseInt(cpf.charAt(i)) * (10 - i);
       let firstCheck = 11 - (sum % 11);
       if (firstCheck >= 10) firstCheck = 0;
       if (firstCheck !== parseInt(cpf.charAt(9))) return false;
 
       sum = 0;
-      for (let i = 0; i < 10; i++) {
-        sum += parseInt(cpf.charAt(i)) * (11 - i);
-      }
+      for (let i = 0; i < 10; i++) sum += parseInt(cpf.charAt(i)) * (11 - i);
       let secondCheck = 11 - (sum % 11);
       if (secondCheck >= 10) secondCheck = 0;
       if (secondCheck !== parseInt(cpf.charAt(10))) return false;
@@ -157,9 +573,7 @@
     }
 
     async function fetchAddressByCEP() {
-      const cepInput = document.getElementById("cep");
-      const cep = onlyDigits(cepInput.value);
-
+      const cep = onlyDigits(document.getElementById("zip_code").value);
       if (cep.length !== 8) return;
 
       try {
@@ -174,7 +588,7 @@
         document.getElementById("address").value = data.logradouro || "";
         document.getElementById("neighborhood").value = data.bairro || "";
         document.getElementById("city").value = data.localidade || "";
-        document.getElementById("state").value = data.uf || "";
+        document.getElementById("state").value = (data.uf || "").toUpperCase();
         setEmployeeMessage("Endereço preenchido pelo CEP.");
       } catch (error) {
         setEmployeeMessage("Erro ao buscar CEP.", true);
@@ -214,34 +628,122 @@
       document.getElementById("msg").innerText = "Sessão encerrada";
     }
 
-    async function saveEmployee() {
-      const employee = {
-        full_name: document.getElementById("full_name").value.trim(),
-        birth_date: document.getElementById("birth_date").value || null,
-        cpf: document.getElementById("cpf").value.trim(),
-        rg: document.getElementById("rg").value.trim(),
-        zip_code: document.getElementById("cep").value.trim(),
-        address: document.getElementById("address").value.trim(),
-        address_number: document.getElementById("address_number").value.trim(),
-        address_complement: document.getElementById("address_complement").value.trim(),
-        neighborhood: document.getElementById("neighborhood").value.trim(),
-        city: document.getElementById("city").value.trim(),
-        state: document.getElementById("state").value.trim().toUpperCase(),
-        phone: document.getElementById("phone").value.trim(),
-        mobile: document.getElementById("mobile").value.trim(),
-        role: document.getElementById("role").value.trim(),
-        admission_date: document.getElementById("admission_date").value || null,
-        ctps_number: document.getElementById("ctps_number").value.trim(),
-        ctps_series: document.getElementById("ctps_series").value.trim()
-      };
+    function getField(id) {
+      return document.getElementById(id);
+    }
 
-      if (!employee.full_name || !employee.rg || !employee.cpf || !employee.role || !employee.ctps_number || !employee.ctps_series || !employee.city || !employee.state) {
-        setEmployeeMessage("Preencha todos os campos obrigatórios.", true);
-        return;
+    function collectEmployee() {
+      return {
+        full_name: getField("full_name").value.trim(),
+        social_name: getField("social_name").value.trim(),
+        birth_date: getField("birth_date").value || null,
+        cpf: getField("cpf").value.trim(),
+        rg: getField("rg").value.trim(),
+        rg_issue_date: getField("rg_issue_date").value || null,
+        rg_issuer: getField("rg_issuer").value.trim(),
+        rg_issuer_state: getField("rg_issuer_state").value.trim().toUpperCase(),
+        mother_name: getField("mother_name").value.trim(),
+        father_name: getField("father_name").value.trim(),
+        nationality: getField("nationality").value.trim(),
+        birthplace: getField("birthplace").value.trim(),
+        marital_status: getField("marital_status").value,
+        education_level: getField("education_level").value,
+        ethnicity: getField("ethnicity").value,
+        first_job: toNullableBoolean(getField("first_job").value),
+        retired: toNullableBoolean(getField("retired").value),
+        disability: toNullableBoolean(getField("disability").value),
+        disability_description: getField("disability_description").value.trim(),
+
+        ctps_number: getField("ctps_number").value.trim(),
+        ctps_series: getField("ctps_series").value.trim(),
+        ctps_state: getField("ctps_state").value.trim().toUpperCase(),
+        ctps_issue_date: getField("ctps_issue_date").value || null,
+        pis_nis: getField("pis_nis").value.trim(),
+        voter_title: getField("voter_title").value.trim(),
+        voter_zone: getField("voter_zone").value.trim(),
+        voter_section: getField("voter_section").value.trim(),
+        reservist_certificate: getField("reservist_certificate").value.trim(),
+        reservist_category: getField("reservist_category").value.trim(),
+        cnh_number: getField("cnh_number").value.trim(),
+        cnh_category: getField("cnh_category").value.trim(),
+        cnh_issue_date: getField("cnh_issue_date").value || null,
+        cnh_expiry_date: getField("cnh_expiry_date").value || null,
+        first_license_date: getField("first_license_date").value || null,
+
+        zip_code: getField("zip_code").value.trim(),
+        address: getField("address").value.trim(),
+        address_number: getField("address_number").value.trim(),
+        address_complement: getField("address_complement").value.trim(),
+        neighborhood: getField("neighborhood").value.trim(),
+        city: getField("city").value.trim(),
+        state: getField("state").value.trim().toUpperCase(),
+
+        phone: getField("phone").value.trim(),
+        mobile: getField("mobile").value.trim(),
+        personal_email: getField("personal_email").value.trim(),
+        contact_message_phone: getField("contact_message_phone").value.trim(),
+
+        role: getField("role").value.trim(),
+        admission_date: getField("admission_date").value || null,
+        salary_amount: toNullableNumber(getField("salary_amount").value),
+        salary_type: getField("salary_type").value,
+        sector: getField("sector").value.trim(),
+        supervisor: getField("supervisor").value.trim(),
+        work_schedule: getField("work_schedule").value.trim(),
+        work_shift: getField("work_shift").value.trim(),
+        trial_contract: toNullableBoolean(getField("trial_contract").value),
+        trial_days: toNullableInteger(getField("trial_days").value),
+        extension_days: toNullableInteger(getField("extension_days").value),
+        trial_end_date: getField("trial_end_date").value || null,
+        transport_voucher: toNullableBoolean(getField("transport_voucher").value),
+        transport_per_day: getField("transport_per_day").value.trim(),
+        transport_type: getField("transport_type").value,
+
+        dependents_count: toNullableInteger(getField("dependents_count").value),
+        dependents: getField("dependents").value.trim(),
+
+        observations: getField("observations").value.trim(),
+        registration_date: getField("registration_date").value || null,
+        registration_responsible: getField("registration_responsible").value.trim()
+      };
+    }
+
+    function validateEmployee(employee) {
+      const requiredFields = [
+        ["full_name", "Nome completo"],
+        ["birth_date", "Data de nascimento"],
+        ["cpf", "CPF"],
+        ["rg", "RG"],
+        ["mother_name", "Nome da mãe"],
+        ["nationality", "Nacionalidade"],
+        ["birthplace", "Naturalidade"],
+        ["marital_status", "Estado civil"],
+        ["ctps_number", "CTPS número"],
+        ["ctps_series", "CTPS série"],
+        ["zip_code", "CEP"],
+        ["address", "Endereço"],
+        ["address_number", "Número"],
+        ["neighborhood", "Bairro"],
+        ["city", "Cidade"],
+        ["state", "UF"],
+        ["role", "Cargo / função"],
+        ["admission_date", "Data de admissão"]
+      ];
+
+      for (const [key, label] of requiredFields) {
+        if (!employee[key]) return `${label} é obrigatório.`;
       }
 
-      if (!validateCPF(employee.cpf)) {
-        setEmployeeMessage("CPF inválido. Digite um CPF válido.", true);
+      if (!validateCPF(employee.cpf)) return "CPF inválido. Digite um CPF válido.";
+      return null;
+    }
+
+    async function saveEmployee() {
+      const employee = collectEmployee();
+      const validationError = validateEmployee(employee);
+
+      if (validationError) {
+        setEmployeeMessage(validationError, true);
         return;
       }
 
@@ -259,14 +761,27 @@
 
       saveRole(employee.role);
       setEmployeeMessage("Funcionário salvo com sucesso.");
-
-      [
-        "full_name", "birth_date", "cpf", "rg", "cep", "address", "address_number",
-        "address_complement", "neighborhood", "city", "state", "phone", "mobile",
-        "role", "admission_date", "ctps_number", "ctps_series"
-      ].forEach(id => document.getElementById(id).value = "");
-
+      resetForm();
       loadEmployees();
+    }
+
+    function resetForm() {
+      const ids = [
+        "full_name","social_name","birth_date","cpf","rg","rg_issue_date","rg_issuer","rg_issuer_state",
+        "mother_name","father_name","nationality","birthplace","marital_status","education_level","ethnicity",
+        "first_job","retired","disability","disability_description","ctps_number","ctps_series","ctps_state",
+        "ctps_issue_date","pis_nis","voter_title","voter_zone","voter_section","reservist_certificate",
+        "reservist_category","cnh_number","cnh_category","cnh_issue_date","cnh_expiry_date","first_license_date",
+        "zip_code","address","address_number","address_complement","neighborhood","city","state","phone","mobile",
+        "personal_email","contact_message_phone","role","admission_date","salary_amount","salary_type","sector",
+        "supervisor","work_schedule","work_shift","trial_contract","trial_days","extension_days","trial_end_date",
+        "transport_voucher","transport_per_day","transport_type","dependents_count","dependents","observations",
+        "registration_date","registration_responsible"
+      ];
+      ids.forEach(id => getField(id).value = "");
+      showTab("dados-pessoais");
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.querySelector('.tab-btn[data-tab="dados-pessoais"]').classList.add("active");
     }
 
     async function loadEmployees() {
@@ -275,7 +790,7 @@
 
       const { data, error } = await supabaseClient
         .from("employees")
-        .select("id, full_name, cpf, rg, role, ctps_number, ctps_series, city, state, admission_date")
+        .select("full_name, cpf, role, admission_date, city, state")
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -288,7 +803,6 @@
 
     async function checkSession() {
       const { data } = await supabaseClient.auth.getSession();
-
       if (data?.session) {
         document.getElementById("panel").classList.remove("hidden");
         document.getElementById("msg").innerText = "Sessão já iniciada";
@@ -299,26 +813,17 @@
     document.addEventListener("DOMContentLoaded", () => {
       loadRoles();
 
-      document.getElementById("cpf").addEventListener("input", e => {
-        e.target.value = maskCPF(e.target.value);
-      });
+      getField("cpf").addEventListener("input", e => e.target.value = maskCPF(e.target.value));
+      getField("phone").addEventListener("input", e => e.target.value = maskPhone(e.target.value));
+      getField("mobile").addEventListener("input", e => e.target.value = maskMobile(e.target.value));
+      getField("zip_code").addEventListener("input", e => e.target.value = maskCEP(e.target.value));
+      getField("zip_code").addEventListener("blur", fetchAddressByCEP);
+      getField("rg").addEventListener("input", e => e.target.value = maskRG(e.target.value));
 
-      document.getElementById("phone").addEventListener("input", e => {
-        e.target.value = maskPhone(e.target.value);
-      });
-
-      document.getElementById("mobile").addEventListener("input", e => {
-        e.target.value = maskMobile(e.target.value);
-      });
-
-      document.getElementById("cep").addEventListener("input", e => {
-        e.target.value = maskCEP(e.target.value);
-      });
-
-      document.getElementById("cep").addEventListener("blur", fetchAddressByCEP);
-
-      document.getElementById("rg").addEventListener("input", e => {
-        e.target.value = maskRG(e.target.value);
+      ["state","rg_issuer_state","ctps_state"].forEach(id => {
+        getField(id).addEventListener("input", e => {
+          e.target.value = e.target.value.replace(/[^a-zA-Z]/g, "").toUpperCase().slice(0, 2);
+        });
       });
 
       checkSession();
