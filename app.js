@@ -80,7 +80,7 @@ function switchView(view) {
     settings: ['Configurações', 'Conexão do sistema com o Supabase.'],
   };
   $$('.view').forEach(v => v.classList.remove('active'));
-  $(`#view-${view}`).classList.add('active');
+  $(`view-${view}`).classList.add('active');
   $$('.nav-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.view === view));
   $('pageTitle').textContent = map[view][0];
   $('pageSubtitle').textContent = map[view][1];
