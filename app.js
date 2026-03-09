@@ -8,18 +8,24 @@ async function login(){
 const email = document.getElementById("email").value;
 const password = document.getElementById("password").value;
 
-const { error } = await supabase.auth.signInWithPassword({
+document.getElementById("msg").innerText = "Entrando...";
+
+const { data, error } = await supabase.auth.signInWithPassword({
 email,
 password
 });
 
 if(error){
 
-document.getElementById("msg").innerText = error.message;
+document.getElementById("msg").innerText =
+"ERRO: " + error.message;
+
+console.log(error);
 
 }else{
 
-document.getElementById("msg").innerText = "Login realizado";
+document.getElementById("msg").innerText =
+"Login realizado";
 
 document.getElementById("panel").classList.remove("hidden");
 
@@ -39,12 +45,12 @@ async function loadEmployees(){
 
 const { data, error } = await supabase
 .from("employees")
-.select("*")
-.limit(10);
+.select("*");
 
 if(error){
 
-document.getElementById("result").innerText = error.message;
+document.getElementById("result").innerText =
+error.message;
 
 }else{
 
