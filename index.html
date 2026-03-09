@@ -1,52 +1,89 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Empório Pet RH</title>
-
-<link rel="stylesheet" href="style.css">
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Empório Pet RH</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-
 <body>
+  <div class="container">
+    <h1>Empório Pet RH</h1>
 
-<div class="container">
+    <div class="card">
+      <h2>Login</h2>
 
-<h1>Empório Pet RH</h1>
+      <input id="email" type="email" placeholder="E-mail" />
+      <input id="password" type="password" placeholder="Senha" />
 
-<div class="card">
+      <button onclick="login()">Entrar</button>
 
-<h2>Login</h2>
+      <p id="msg"></p>
+    </div>
 
-<input id="email" type="email" placeholder="E-mail">
+    <div class="card hidden" id="panel">
+      <h2>Painel</h2>
+      <button onclick="loadEmployees()">Ver Funcionários</button>
+      <pre id="result"></pre>
+      <button onclick="logout()">Sair</button>
+    </div>
+  </div>
 
-<input id="password" type="password" placeholder="Senha">
+  <script>
+    const SUPABASE_URL = "https://xqikfrufphwaqmfuexvx.supabase.co";
+    const SUPABASE_KEY = "sb_publishable__-5ZX8k6kNTwQH5dvZxvMA_xVCX7-Up";
 
-<button onclick="login()">Entrar</button>
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-<p id="msg"></p>
+    async function login() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const msg = document.getElementById("msg");
 
-</div>
+      msg.innerText = "Entrando...";
 
-<div class="card hidden" id="panel">
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
 
-<h2>Painel</h2>
+      if (error) {
+        msg.innerText = "Erro: " + error.message;
+        return;
+      }
 
-<button onclick="loadEmployees()">Ver Funcionários</button>
+      if (data?.session) {
+        msg.innerText = "Login realizado com sucesso";
+        document.getElementById("panel").classList.remove("hidden");
+      } else {
+        msg.innerText = "Login sem sessão retornada";
+      }
+    }
 
-<pre id="result"></pre>
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      document.getElementById("panel").classList.add("hidden");
+      document.getElementById("result").innerText = "";
+      document.getElementById("msg").innerText = "Sessão encerrada";
+    }
 
-<button onclick="logout()">Sair</button>
+    async function loadEmployees() {
+      const result = document.getElementById("result");
+      result.innerText = "Carregando...";
 
-</div>
+      const { data, error } = await supabaseClient
+        .from("employees")
+        .select("*")
+        .limit(10);
 
-</div>
+      if (error) {
+        result.innerText = "Erro: " + error.message;
+        return;
+      }
 
-<script src="app.js"></script>
-
+      result.innerText = JSON.stringify(data, null, 2);
+    }
+  </script>
 </body>
 </html>
