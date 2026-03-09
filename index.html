@@ -177,9 +177,41 @@
               <label for="email">E-mail</label>
               <input id="email" type="email" placeholder="nome@empresa.com" />
             </div>
+            <div class="field">
+              <label for="cep">CEP</label>
+              <input id="cep" maxlength="9" placeholder="00000-000" />
+            </div>
+            <div class="field">
+              <label>&nbsp;</label>
+              <button id="btnLookupCep" type="button" class="btn btn-ghost">Buscar CEP</button>
+            </div>
             <div class="field span-2">
-              <label for="address">Endereço</label>
-              <input id="address" placeholder="Rua, número, bairro, cidade" />
+              <label for="address_street">Rua / Logradouro</label>
+              <input id="address_street" placeholder="Rua, avenida, travessa..." />
+            </div>
+            <div class="field">
+              <label for="address_number">Número</label>
+              <input id="address_number" placeholder="123" />
+            </div>
+            <div class="field">
+              <label for="address_complement">Complemento</label>
+              <input id="address_complement" placeholder="Casa, apto, fundos..." />
+            </div>
+            <div class="field span-2">
+              <label for="address_neighborhood">Bairro</label>
+              <input id="address_neighborhood" placeholder="Centro" />
+            </div>
+            <div class="field">
+              <label for="address_city">Cidade</label>
+              <input id="address_city" placeholder="Leme" />
+            </div>
+            <div class="field">
+              <label for="address_state">Estado</label>
+              <input id="address_state" maxlength="2" placeholder="SP" />
+            </div>
+            <div class="field span-2">
+              <label for="address">Endereço completo</label>
+              <input id="address" placeholder="Preenchido automaticamente com base nos campos acima" readonly />
             </div>
             <div class="field">
               <label for="role">Cargo</label>

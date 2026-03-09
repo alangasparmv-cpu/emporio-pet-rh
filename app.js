@@ -26,6 +26,13 @@ const fields = {
   phone: $('phone'),
   mobile: $('mobile'),
   email: $('email'),
+  cep: $('cep'),
+  address_street: $('address_street'),
+  address_number: $('address_number'),
+  address_complement: $('address_complement'),
+  address_neighborhood: $('address_neighborhood'),
+  address_city: $('address_city'),
+  address_state: $('address_state'),
   address: $('address'),
   role: $('role'),
   sector: $('sector'),
@@ -80,7 +87,7 @@ function switchView(view) {
     settings: ['Configurações', 'Conexão do sistema com o Supabase.'],
   };
   $$('.view').forEach(v => v.classList.remove('active'));
-$(`view-${view}`).classList.add('active');
+  $(`view-${view}`)?.classList.add('active');
   $$('.nav-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.view === view));
   $('pageTitle').textContent = map[view][0];
   $('pageSubtitle').textContent = map[view][1];
@@ -121,6 +128,65 @@ function maskPhone(value) {
     return digits.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2');
   }
   return digits.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
+}
+
+function maskCEP(value) {
+  const digits = onlyDigits(value).slice(0, 8);
+  return digits.replace(/(\d{5})(\d)/, '$1-$2');
+}
+
+function capitalizeWords(text) {
+  return (text || '').replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+function composeAddress(parts = {}) {
+  const street = parts.address_street?.trim();
+  const number = parts.address_number?.trim();
+  const complement = parts.address_complement?.trim();
+  const neighborhood = parts.address_neighborhood?.trim();
+  const city = parts.address_city?.trim();
+  const stateCode = (parts.address_state || '').trim().toUpperCase();
+  const line1 = [street, number].filter(Boolean).join(', ');
+  const line2 = [complement, neighborhood].filter(Boolean).join(' - ');
+  const line3 = [city, stateCode].filter(Boolean).join(' / ');
+  return [line1, line2, line3].filter(Boolean).join(' | ') || null;
+}
+
+function updateAddressPreview() {
+  fields.address.value = composeAddress({
+    address_street: fields.address_street.value,
+    address_number: fields.address_number.value,
+    address_complement: fields.address_complement.value,
+    address_neighborhood: fields.address_neighborhood.value,
+    address_city: fields.address_city.value,
+    address_state: fields.address_state.value,
+  }) || '';
+}
+
+async function lookupCEP() {
+  const cep = onlyDigits(fields.cep.value);
+  if (cep.length !== 8) {
+    showToast('Digite um CEP válido com 8 números.', true);
+    return;
+  }
+
+  try {
+    const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const data = await response.json();
+    if (!response.ok || data.erro) {
+      throw new Error('CEP não encontrado.');
+    }
+
+    fields.address_street.value = data.logradouro || '';
+    fields.address_neighborhood.value = data.bairro || '';
+    fields.address_city.value = data.localidade || '';
+    fields.address_state.value = (data.uf || '').toUpperCase();
+    updateAddressPreview();
+    fields.address_number.focus();
+    showToast('Endereço preenchido pelo CEP.');
+  } catch (error) {
+    showToast(error.message || 'Não foi possível consultar o CEP.', true);
+  }
 }
 
 function formatDate(dateStr) {
@@ -164,8 +230,23 @@ function isValidCPF(cpf) {
 function applyMasks() {
   fields.cpf.addEventListener('input', (e) => e.target.value = maskCPF(e.target.value));
   fields.rg.addEventListener('input', (e) => e.target.value = maskRG(e.target.value));
+  fields.cep.addEventListener('input', (e) => e.target.value = maskCEP(e.target.value));
   [fields.phone, fields.mobile, fields.emergency_phone].forEach(input => {
     input.addEventListener('input', (e) => e.target.value = maskPhone(e.target.value));
+  });
+  [fields.address_street, fields.address_number, fields.address_complement, fields.address_neighborhood, fields.address_city, fields.address_state].forEach(input => {
+    input.addEventListener('input', () => {
+      if (input === fields.address_state) {
+        input.value = input.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
+      }
+      if (input === fields.address_city || input === fields.address_neighborhood || input === fields.address_street) {
+        input.value = capitalizeWords(input.value);
+      }
+      updateAddressPreview();
+    });
+  });
+  fields.cep.addEventListener('blur', () => {
+    if (onlyDigits(fields.cep.value).length === 8) lookupCEP();
   });
   fields.salary.addEventListener('blur', (e) => e.target.value = formatCurrencyInput(e.target.value));
 }
@@ -190,6 +271,7 @@ function resetForm() {
   state.photoFile = null;
   state.photoRemoved = false;
   clearPhotoPreview();
+  updateAddressPreview();
   $('formTitle').textContent = 'Cadastro de funcionário';
   $('btnCancelEdit').classList.add('hidden');
   switchView('new');
@@ -213,6 +295,7 @@ function buildInfoLines(employee) {
   return [
     employee.cpf ? `CPF: ${employee.cpf}` : null,
     employee.mobile ? `Celular: ${employee.mobile}` : employee.phone ? `Telefone: ${employee.phone}` : null,
+    employee.address_city ? `Cidade: ${employee.address_city}${employee.address_state ? '/' + employee.address_state : ''}` : null,
     employee.hire_date ? `Admissão: ${formatDate(employee.hire_date)}` : null,
     employee.salary ? `Salário: ${formatCurrency(employee.salary)}` : null,
   ].filter(Boolean);
@@ -390,7 +473,21 @@ function collectFormData() {
     phone: fields.phone.value.trim() || null,
     mobile: fields.mobile.value.trim() || null,
     email: fields.email.value.trim() || null,
-    address: fields.address.value.trim() || null,
+    cep: fields.cep.value.trim() || null,
+    address_street: fields.address_street.value.trim() || null,
+    address_number: fields.address_number.value.trim() || null,
+    address_complement: fields.address_complement.value.trim() || null,
+    address_neighborhood: fields.address_neighborhood.value.trim() || null,
+    address_city: fields.address_city.value.trim() || null,
+    address_state: fields.address_state.value.trim().toUpperCase() || null,
+    address: composeAddress({
+      address_street: fields.address_street.value,
+      address_number: fields.address_number.value,
+      address_complement: fields.address_complement.value,
+      address_neighborhood: fields.address_neighborhood.value,
+      address_city: fields.address_city.value,
+      address_state: fields.address_state.value,
+    }),
     role: fields.role.value.trim() || null,
     sector: fields.sector.value.trim() || null,
     hire_date: fields.hire_date.value || null,
@@ -461,7 +558,14 @@ function startEdit(id) {
   fields.phone.value = employee.phone || '';
   fields.mobile.value = employee.mobile || '';
   fields.email.value = employee.email || '';
-  fields.address.value = employee.address || '';
+  fields.cep.value = employee.cep || '';
+  fields.address_street.value = employee.address_street || '';
+  fields.address_number.value = employee.address_number || '';
+  fields.address_complement.value = employee.address_complement || '';
+  fields.address_neighborhood.value = employee.address_neighborhood || '';
+  fields.address_city.value = employee.address_city || '';
+  fields.address_state.value = employee.address_state || '';
+  updateAddressPreview();
   fields.role.value = employee.role || '';
   fields.sector.value = employee.sector || '';
   fields.hire_date.value = employee.hire_date || '';
@@ -501,6 +605,8 @@ function bindEvents() {
     clearPhotoPreview();
   });
 
+  $('btnLookupCep').addEventListener('click', lookupCEP);
+
   ['searchInput', 'filterStatus', 'filterSector', 'filterRole'].forEach(id => {
     $(id).addEventListener('input', renderEmployees);
     $(id).addEventListener('change', renderEmployees);
@@ -534,6 +640,7 @@ async function bootstrap() {
   bindEvents();
   applyMasks();
   clearPhotoPreview();
+  updateAddressPreview();
   $('btnCancelEdit').classList.add('hidden');
 
   const connected = await initSupabase();
