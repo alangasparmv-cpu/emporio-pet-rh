@@ -1,73 +1,98 @@
-
 body{
-font-family:Arial;
-background:#f2f2f2;
-padding:20px;
+  font-family:Arial,sans-serif;
+  background:#f2f2f2;
+  padding:20px;
+  margin:0;
 }
 
 .container{
-max-width:900px;
-margin:auto;
+  max-width:920px;
+  margin:auto;
 }
 
 .card{
-background:white;
-padding:25px;
-border-radius:12px;
-margin-bottom:20px;
-box-shadow:0 3px 10px rgba(0,0,0,0.1);
+  background:white;
+  padding:25px;
+  border-radius:12px;
+  margin-bottom:20px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.1);
 }
 
 input{
-width:100%;
-padding:10px;
-margin-bottom:10px;
-border-radius:6px;
-border:1px solid #ccc;
+  width:100%;
+  padding:10px;
+  margin-bottom:12px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
 }
 
 button{
-padding:10px 16px;
-border:none;
-border-radius:6px;
-background:#2e8b57;
-color:white;
-cursor:pointer;
+  padding:10px 16px;
+  border:none;
+  border-radius:6px;
+  background:#2e8b57;
+  color:white;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+button.secondary{
+  background:#6c757d;
 }
 
 .hidden{
-display:none;
+  display:none;
+}
+
+.top-bar, .list-header, .actions-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
 .employee_card{
-
-display:flex;
-align-items:center;
-gap:15px;
-background:#fafafa;
-padding:10px;
-border-radius:8px;
-margin-bottom:10px;
-
+  display:flex;
+  align-items:center;
+  gap:15px;
+  background:#fafafa;
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:12px;
 }
 
 .employee_card img{
-
-width:60px;
-height:60px;
-border-radius:50%;
-object-fit:cover;
-
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#ddd;
 }
 
 .employee_info{
-
-flex:1;
-
+  flex:1;
+  line-height:1.4;
 }
 
 .employee_actions button{
+  background:#3498db;
+}
 
-background:#3498db;
+hr{
+  border:none;
+  border-top:1px solid #ddd;
+  margin:18px 0;
+}
 
+#msg, #employeeMsg{
+  margin-top:12px;
+  font-weight:bold;
+}
+
+@media (max-width: 680px){
+  .employee_card{
+    align-items:flex-start;
+  }
 }

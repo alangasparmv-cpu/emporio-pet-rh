@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -8,219 +7,236 @@
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-
 <body>
 
 <div class="container">
+  <h1>Empório Pet RH</h1>
 
-<h1>Empório Pet RH</h1>
+  <div class="card">
+    <h2>Login</h2>
+    <input id="email" type="email" placeholder="E-mail">
+    <input id="password" type="password" placeholder="Senha">
+    <button onclick="login()">Entrar</button>
+    <p id="msg"></p>
+  </div>
 
-<div class="card">
-<h2>Login</h2>
-<input id="email" type="email" placeholder="E-mail">
-<input id="password" type="password" placeholder="Senha">
-<button onclick="login()">Entrar</button>
-<p id="msg"></p>
-</div>
+  <div class="card hidden" id="panel">
+    <div class="top-bar">
+      <h2 id="formTitle">Cadastro de Funcionário</h2>
+      <button class="secondary" onclick="logout()">Sair</button>
+    </div>
 
-<div class="card hidden" id="panel">
+    <input id="employee_id" type="hidden">
 
-<h2>Cadastro / Edição de Funcionário</h2>
+    <label>Nome completo *</label>
+    <input id="full_name">
 
-<input id="employee_id" type="hidden">
+    <label>CPF *</label>
+    <input id="cpf">
 
-<label>Nome completo *</label>
-<input id="full_name">
+    <label>Cargo *</label>
+    <input id="role">
 
-<label>CPF *</label>
-<input id="cpf">
+    <label>Cidade *</label>
+    <input id="city">
 
-<label>Cargo *</label>
-<input id="role">
+    <label>UF *</label>
+    <input id="state" maxlength="2">
 
-<label>Cidade *</label>
-<input id="city">
+    <label>Data de admissão *</label>
+    <input id="admission_date" type="date">
 
-<label>UF *</label>
-<input id="state">
+    <label>Foto do funcionário (URL da imagem)</label>
+    <input id="photo" placeholder="Cole aqui o link da foto, se desejar">
 
-<label>Data de admissão *</label>
-<input id="admission_date" type="date">
+    <div class="actions-row">
+      <button id="saveBtn" onclick="saveEmployee()">Salvar funcionário</button>
+      <button id="cancelEditBtn" class="secondary hidden" onclick="cancelEdit()">Cancelar edição</button>
+    </div>
 
-<label>Foto do funcionário (URL da imagem)</label>
-<input id="photo">
+    <p id="employeeMsg"></p>
 
-<button onclick="saveEmployee()">Salvar funcionário</button>
-<p id="employeeMsg"></p>
+    <hr>
 
-<hr>
+    <div class="list-header">
+      <h2>Funcionários cadastrados</h2>
+      <button class="secondary" onclick="loadEmployees()">Atualizar lista</button>
+    </div>
 
-<h2>Funcionários cadastrados</h2>
-
-<div id="employees_list"></div>
-
-</div>
+    <div id="employees_list"></div>
+  </div>
 </div>
 
 <script>
-
 const SUPABASE_URL = "https://xqikfrufphwaqmfuexvx.supabase.co";
 const SUPABASE_KEY = "sb_publishable__-5ZX8k6kNTwQH5dvZxvMA_xVCX7-Up";
-
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function login(){
+async function login() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+  if (error) {
+    document.getElementById("msg").innerText = error.message;
+    return;
+  }
 
-const { data, error } = await supabaseClient.auth.signInWithPassword({
-email,
-password
-});
-
-if(error){
-document.getElementById("msg").innerText = error.message;
-return;
+  document.getElementById("msg").innerText = "Login realizado com sucesso";
+  document.getElementById("panel").classList.remove("hidden");
+  loadEmployees();
 }
 
-document.getElementById("panel").classList.remove("hidden");
-
-loadEmployees();
-
+async function logout() {
+  await supabaseClient.auth.signOut();
+  document.getElementById("panel").classList.add("hidden");
+  document.getElementById("msg").innerText = "Sessão encerrada";
 }
 
-function clearForm(){
-
-document.getElementById("employee_id").value="";
-document.getElementById("full_name").value="";
-document.getElementById("cpf").value="";
-document.getElementById("role").value="";
-document.getElementById("city").value="";
-document.getElementById("state").value="";
-document.getElementById("admission_date").value="";
-document.getElementById("photo").value="";
-
+function clearForm() {
+  document.getElementById("employee_id").value = "";
+  document.getElementById("full_name").value = "";
+  document.getElementById("cpf").value = "";
+  document.getElementById("role").value = "";
+  document.getElementById("city").value = "";
+  document.getElementById("state").value = "";
+  document.getElementById("admission_date").value = "";
+  document.getElementById("photo").value = "";
+  document.getElementById("employeeMsg").innerText = "";
 }
 
-async function saveEmployee(){
-
-const id = document.getElementById("employee_id").value;
-
-const employee = {
-
-full_name:document.getElementById("full_name").value,
-cpf:document.getElementById("cpf").value,
-role:document.getElementById("role").value,
-city:document.getElementById("city").value,
-state:document.getElementById("state").value,
-admission_date:document.getElementById("admission_date").value,
-photo:document.getElementById("photo").value
-
+function setEditMode(isEditing) {
+  document.getElementById("formTitle").innerText = isEditing ? "Editar Funcionário" : "Cadastro de Funcionário";
+  document.getElementById("saveBtn").innerText = isEditing ? "Salvar alterações" : "Salvar funcionário";
+  document.getElementById("cancelEditBtn").classList.toggle("hidden", !isEditing);
 }
 
-let response;
-
-if(id){
-
-response = await supabaseClient
-.from("employees")
-.update(employee)
-.eq("id",id)
-
-}else{
-
-response = await supabaseClient
-.from("employees")
-.insert([employee])
-
+function cancelEdit() {
+  clearForm();
+  setEditMode(false);
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-if(response.error){
-
-document.getElementById("employeeMsg").innerText=response.error.message;
-return;
-
+function validateFields(employee) {
+  if (!employee.full_name) return "Preencha o nome completo.";
+  if (!employee.cpf) return "Preencha o CPF.";
+  if (!employee.role) return "Preencha o cargo.";
+  if (!employee.city) return "Preencha a cidade.";
+  if (!employee.state) return "Preencha a UF.";
+  if (!employee.admission_date) return "Preencha a data de admissão.";
+  return "";
 }
 
-document.getElementById("employeeMsg").innerText="Salvo com sucesso";
+async function saveEmployee() {
+  const id = document.getElementById("employee_id").value;
 
-clearForm();
+  const employee = {
+    full_name: document.getElementById("full_name").value.trim(),
+    cpf: document.getElementById("cpf").value.trim(),
+    role: document.getElementById("role").value.trim(),
+    city: document.getElementById("city").value.trim(),
+    state: document.getElementById("state").value.trim().toUpperCase(),
+    admission_date: document.getElementById("admission_date").value,
+    photo: document.getElementById("photo").value.trim()
+  };
 
-loadEmployees();
+  const validationMessage = validateFields(employee);
+  if (validationMessage) {
+    document.getElementById("employeeMsg").innerText = validationMessage;
+    return;
+  }
 
+  let response;
+  if (id) {
+    response = await supabaseClient.from("employees").update(employee).eq("id", id);
+  } else {
+    response = await supabaseClient.from("employees").insert([employee]);
+  }
+
+  if (response.error) {
+    document.getElementById("employeeMsg").innerText = response.error.message;
+    return;
+  }
+
+  document.getElementById("employeeMsg").innerText = id ? "Alterações salvas com sucesso." : "Funcionário salvo com sucesso.";
+  clearForm();
+  setEditMode(false);
+  loadEmployees();
 }
 
-async function loadEmployees(){
-
-const {data,error}=await supabaseClient
-.from("employees")
-.select("*")
-.order("created_at",{ascending:false})
-
-if(error){
-
-document.getElementById("employees_list").innerText=error.message;
-return;
-
+function getFallbackPhoto() {
+  return "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 }
 
-let html="";
+async function loadEmployees() {
+  const { data, error } = await supabaseClient
+    .from("employees")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-data.forEach(emp=>{
+  if (error) {
+    document.getElementById("employees_list").innerText = error.message;
+    return;
+  }
 
-html+=`
-<div class="employee_card">
+  let html = "";
+  data.forEach(emp => {
+    const safePhoto = emp.photo && emp.photo !== "undefined" ? emp.photo : getFallbackPhoto();
+    html += `
+      <div class="employee_card">
+        <img src="${safePhoto}" onerror="this.src='${getFallbackPhoto()}'">
+        <div class="employee_info">
+          <b>${emp.full_name || ""}</b><br>
+          CPF: ${emp.cpf || ""}<br>
+          Cargo: ${emp.role || ""}<br>
+          ${(emp.city || "")}${emp.state ? "/" + emp.state : ""}
+        </div>
+        <div class="employee_actions">
+          <button onclick="editEmployee('${emp.id}')">Editar</button>
+        </div>
+      </div>
+    `;
+  });
 
-<img src="${emp.photo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}">
-
-<div class="employee_info">
-
-<b>${emp.full_name}</b><br>
-CPF: ${emp.cpf}<br>
-Cargo: ${emp.role}<br>
-${emp.city}/${emp.state}
-
-</div>
-
-<div class="employee_actions">
-
-<button onclick="editEmployee('${emp.id}')">Editar</button>
-
-</div>
-
-</div>
-`
-
-})
-
-document.getElementById("employees_list").innerHTML=html;
-
+  document.getElementById("employees_list").innerHTML = html || "<p>Nenhum funcionário cadastrado.</p>";
 }
 
-async function editEmployee(id){
+async function editEmployee(id) {
+  const { data, error } = await supabaseClient
+    .from("employees")
+    .select("*")
+    .eq("id", id)
+    .single();
 
-const {data,error}=await supabaseClient
-.from("employees")
-.select("*")
-.eq("id",id)
-.single()
+  if (error) {
+    document.getElementById("employeeMsg").innerText = error.message;
+    return;
+  }
 
-if(error) return;
+  document.getElementById("employee_id").value = data.id || "";
+  document.getElementById("full_name").value = data.full_name || "";
+  document.getElementById("cpf").value = data.cpf || "";
+  document.getElementById("role").value = data.role || "";
+  document.getElementById("city").value = data.city || "";
+  document.getElementById("state").value = data.state || "";
+  document.getElementById("admission_date").value = data.admission_date || "";
+  document.getElementById("photo").value = data.photo || "";
 
-document.getElementById("employee_id").value=data.id;
-document.getElementById("full_name").value=data.full_name;
-document.getElementById("cpf").value=data.cpf;
-document.getElementById("role").value=data.role;
-document.getElementById("city").value=data.city;
-document.getElementById("state").value=data.state;
-document.getElementById("admission_date").value=data.admission_date;
-document.getElementById("photo").value=data.photo;
-
-window.scrollTo({top:0,behavior:"smooth"});
-
+  setEditMode(true);
+  document.getElementById("employeeMsg").innerText = "Editando funcionário.";
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+async function checkSession() {
+  const { data } = await supabaseClient.auth.getSession();
+  if (data?.session) {
+    document.getElementById("panel").classList.remove("hidden");
+    document.getElementById("msg").innerText = "Sessão já iniciada";
+    loadEmployees();
+  }
+}
+
+document.addEventListener("DOMContentLoaded", checkSession);
 </script>
 
 </body>
