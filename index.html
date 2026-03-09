@@ -1,243 +1,292 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Empório Pet RH</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Empório Pet RH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
-<div class="container">
-  <h1>Empório Pet RH</h1>
-
-  <div class="card">
-    <h2>Login</h2>
-    <input id="email" type="email" placeholder="E-mail">
-    <input id="password" type="password" placeholder="Senha">
-    <button onclick="login()">Entrar</button>
-    <p id="msg"></p>
-  </div>
-
-  <div class="card hidden" id="panel">
-    <div class="top-bar">
-      <h2 id="formTitle">Cadastro de Funcionário</h2>
-      <button class="secondary" onclick="logout()">Sair</button>
-    </div>
-
-    <input id="employee_id" type="hidden">
-
-    <label>Nome completo *</label>
-    <input id="full_name">
-
-    <label>CPF *</label>
-    <input id="cpf">
-
-    <label>Cargo *</label>
-    <input id="role">
-
-    <label>Cidade *</label>
-    <input id="city">
-
-    <label>UF *</label>
-    <input id="state" maxlength="2">
-
-    <label>Data de admissão *</label>
-    <input id="admission_date" type="date">
-
-    <label>Foto do funcionário (URL da imagem)</label>
-    <input id="photo" placeholder="Cole aqui o link da foto, se desejar">
-
-    <div class="actions-row">
-      <button id="saveBtn" onclick="saveEmployee()">Salvar funcionário</button>
-      <button id="cancelEditBtn" class="secondary hidden" onclick="cancelEdit()">Cancelar edição</button>
-    </div>
-
-    <p id="employeeMsg"></p>
-
-    <hr>
-
-    <div class="list-header">
-      <h2>Funcionários cadastrados</h2>
-      <button class="secondary" onclick="loadEmployees()">Atualizar lista</button>
-    </div>
-
-    <div id="employees_list"></div>
-  </div>
-</div>
-
-<script>
-const SUPABASE_URL = "https://xqikfrufphwaqmfuexvx.supabase.co";
-const SUPABASE_KEY = "sb_publishable__-5ZX8k6kNTwQH5dvZxvMA_xVCX7-Up";
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-async function login() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    document.getElementById("msg").innerText = error.message;
-    return;
-  }
-
-  document.getElementById("msg").innerText = "Login realizado com sucesso";
-  document.getElementById("panel").classList.remove("hidden");
-  loadEmployees();
-}
-
-async function logout() {
-  await supabaseClient.auth.signOut();
-  document.getElementById("panel").classList.add("hidden");
-  document.getElementById("msg").innerText = "Sessão encerrada";
-}
-
-function clearForm() {
-  document.getElementById("employee_id").value = "";
-  document.getElementById("full_name").value = "";
-  document.getElementById("cpf").value = "";
-  document.getElementById("role").value = "";
-  document.getElementById("city").value = "";
-  document.getElementById("state").value = "";
-  document.getElementById("admission_date").value = "";
-  document.getElementById("photo").value = "";
-  document.getElementById("employeeMsg").innerText = "";
-}
-
-function setEditMode(isEditing) {
-  document.getElementById("formTitle").innerText = isEditing ? "Editar Funcionário" : "Cadastro de Funcionário";
-  document.getElementById("saveBtn").innerText = isEditing ? "Salvar alterações" : "Salvar funcionário";
-  document.getElementById("cancelEditBtn").classList.toggle("hidden", !isEditing);
-}
-
-function cancelEdit() {
-  clearForm();
-  setEditMode(false);
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-function validateFields(employee) {
-  if (!employee.full_name) return "Preencha o nome completo.";
-  if (!employee.cpf) return "Preencha o CPF.";
-  if (!employee.role) return "Preencha o cargo.";
-  if (!employee.city) return "Preencha a cidade.";
-  if (!employee.state) return "Preencha a UF.";
-  if (!employee.admission_date) return "Preencha a data de admissão.";
-  return "";
-}
-
-async function saveEmployee() {
-  const id = document.getElementById("employee_id").value;
-
-  const employee = {
-    full_name: document.getElementById("full_name").value.trim(),
-    cpf: document.getElementById("cpf").value.trim(),
-    role: document.getElementById("role").value.trim(),
-    city: document.getElementById("city").value.trim(),
-    state: document.getElementById("state").value.trim().toUpperCase(),
-    admission_date: document.getElementById("admission_date").value,
-    photo: document.getElementById("photo").value.trim()
-  };
-
-  const validationMessage = validateFields(employee);
-  if (validationMessage) {
-    document.getElementById("employeeMsg").innerText = validationMessage;
-    return;
-  }
-
-  let response;
-  if (id) {
-    response = await supabaseClient.from("employees").update(employee).eq("id", id);
-  } else {
-    response = await supabaseClient.from("employees").insert([employee]);
-  }
-
-  if (response.error) {
-    document.getElementById("employeeMsg").innerText = response.error.message;
-    return;
-  }
-
-  document.getElementById("employeeMsg").innerText = id ? "Alterações salvas com sucesso." : "Funcionário salvo com sucesso.";
-  clearForm();
-  setEditMode(false);
-  loadEmployees();
-}
-
-function getFallbackPhoto() {
-  return "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-}
-
-async function loadEmployees() {
-  const { data, error } = await supabaseClient
-    .from("employees")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    document.getElementById("employees_list").innerText = error.message;
-    return;
-  }
-
-  let html = "";
-  data.forEach(emp => {
-    const safePhoto = emp.photo && emp.photo !== "undefined" ? emp.photo : getFallbackPhoto();
-    html += `
-      <div class="employee_card">
-        <img src="${safePhoto}" onerror="this.src='${getFallbackPhoto()}'">
-        <div class="employee_info">
-          <b>${emp.full_name || ""}</b><br>
-          CPF: ${emp.cpf || ""}<br>
-          Cargo: ${emp.role || ""}<br>
-          ${(emp.city || "")}${emp.state ? "/" + emp.state : ""}
-        </div>
-        <div class="employee_actions">
-          <button onclick="editEmployee('${emp.id}')">Editar</button>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">EP</div>
+        <div>
+          <h1>Empório Pet RH</h1>
+          <p>Gestão de colaboradores</p>
         </div>
       </div>
-    `;
-  });
 
-  document.getElementById("employees_list").innerHTML = html || "<p>Nenhum funcionário cadastrado.</p>";
-}
+      <nav class="side-nav">
+        <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+        <button class="nav-btn" data-view="employees">Funcionários</button>
+        <button class="nav-btn" data-view="new">Novo cadastro</button>
+        <button class="nav-btn" data-view="settings">Configurações</button>
+      </nav>
 
-async function editEmployee(id) {
-  const { data, error } = await supabaseClient
-    .from("employees")
-    .select("*")
-    .eq("id", id)
-    .single();
+      <div class="cloud-card">
+        <div class="cloud-title">Supabase</div>
+        <p id="cloudStatus" class="cloud-status offline">Desconectado</p>
+        <button id="btnOpenSettings" class="btn btn-ghost btn-full">Configurar</button>
+      </div>
+    </aside>
 
-  if (error) {
-    document.getElementById("employeeMsg").innerText = error.message;
-    return;
-  }
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <p id="pageSubtitle">Visão geral da equipe e alertas importantes.</p>
+        </div>
+        <div class="topbar-actions">
+          <button id="btnRefresh" class="btn btn-ghost">Atualizar</button>
+          <button id="btnNewEmployeeTop" class="btn btn-primary">Novo funcionário</button>
+        </div>
+      </header>
 
-  document.getElementById("employee_id").value = data.id || "";
-  document.getElementById("full_name").value = data.full_name || "";
-  document.getElementById("cpf").value = data.cpf || "";
-  document.getElementById("role").value = data.role || "";
-  document.getElementById("city").value = data.city || "";
-  document.getElementById("state").value = data.state || "";
-  document.getElementById("admission_date").value = data.admission_date || "";
-  document.getElementById("photo").value = data.photo || "";
+      <section id="view-dashboard" class="view active">
+        <div class="dashboard-grid">
+          <article class="stat-card">
+            <span>Total</span>
+            <strong id="statTotal">0</strong>
+          </article>
+          <article class="stat-card">
+            <span>Ativos</span>
+            <strong id="statActive">0</strong>
+          </article>
+          <article class="stat-card">
+            <span>Experiência</span>
+            <strong id="statTrial">0</strong>
+          </article>
+          <article class="stat-card">
+            <span>Desligados</span>
+            <strong id="statInactive">0</strong>
+          </article>
+        </div>
 
-  setEditMode(true);
-  document.getElementById("employeeMsg").innerText = "Editando funcionário.";
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
+        <div class="panel-grid two-columns">
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Alertas de experiência</h3>
+            </div>
+            <div id="trialAlerts" class="list-block empty-state-inline">Nenhum alerta no momento.</div>
+          </section>
 
-async function checkSession() {
-  const { data } = await supabaseClient.auth.getSession();
-  if (data?.session) {
-    document.getElementById("panel").classList.remove("hidden");
-    document.getElementById("msg").innerText = "Sessão já iniciada";
-    loadEmployees();
-  }
-}
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Aniversariantes do mês</h3>
+            </div>
+            <div id="birthdayList" class="list-block empty-state-inline">Nenhum aniversariante encontrado.</div>
+          </section>
+        </div>
 
-document.addEventListener("DOMContentLoaded", checkSession);
-</script>
+        <section class="panel">
+          <div class="panel-header">
+            <h3>Funcionários recentes</h3>
+          </div>
+          <div id="recentEmployees" class="cards-grid"></div>
+        </section>
+      </section>
 
+      <section id="view-employees" class="view">
+        <section class="panel">
+          <div class="filters-grid">
+            <div class="field grow">
+              <label for="searchInput">Buscar</label>
+              <input id="searchInput" type="text" placeholder="Nome, CPF, cargo, telefone..." />
+            </div>
+            <div class="field">
+              <label for="filterStatus">Status</label>
+              <select id="filterStatus">
+                <option value="">Todos</option>
+                <option value="ativo">Ativo</option>
+                <option value="experiencia">Experiência</option>
+                <option value="afastado">Afastado</option>
+                <option value="desligado">Desligado</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="filterSector">Setor</label>
+              <input id="filterSector" type="text" placeholder="Ex.: Banho e Tosa" />
+            </div>
+            <div class="field">
+              <label for="filterRole">Cargo</label>
+              <input id="filterRole" type="text" placeholder="Ex.: Tosador" />
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header between">
+            <h3>Lista de funcionários</h3>
+            <span id="listCount" class="badge">0 registros</span>
+          </div>
+          <div id="employeeList" class="cards-grid"></div>
+        </section>
+      </section>
+
+      <section id="view-new" class="view">
+        <section class="panel">
+          <div class="panel-header">
+            <h3 id="formTitle">Cadastro de funcionário</h3>
+          </div>
+          <form id="employeeForm" class="form-grid" autocomplete="off">
+            <input type="hidden" id="employeeId" />
+            <div class="photo-section">
+              <div class="photo-preview-wrap">
+                <img id="photoPreview" class="photo-preview" alt="Foto do funcionário" src="" />
+                <div id="photoPlaceholder" class="photo-placeholder">Sem foto</div>
+              </div>
+              <div class="photo-actions">
+                <label class="btn btn-ghost btn-file">
+                  Enviar foto
+                  <input id="photoInput" type="file" accept="image/*" capture="environment" hidden />
+                </label>
+                <button id="btnRemovePhoto" type="button" class="btn btn-light">Remover foto</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="full_name">Nome completo</label>
+              <input id="full_name" required />
+            </div>
+            <div class="field">
+              <label for="birth_date">Data de nascimento</label>
+              <input id="birth_date" type="date" />
+            </div>
+            <div class="field">
+              <label for="cpf">CPF</label>
+              <input id="cpf" maxlength="14" placeholder="000.000.000-00" />
+            </div>
+            <div class="field">
+              <label for="rg">RG</label>
+              <input id="rg" maxlength="20" placeholder="00.000.000-0" />
+            </div>
+            <div class="field">
+              <label for="phone">Telefone</label>
+              <input id="phone" maxlength="15" placeholder="(19) 3333-3333" />
+            </div>
+            <div class="field">
+              <label for="mobile">Celular</label>
+              <input id="mobile" maxlength="15" placeholder="(19) 99999-9999" />
+            </div>
+            <div class="field span-2">
+              <label for="email">E-mail</label>
+              <input id="email" type="email" placeholder="nome@empresa.com" />
+            </div>
+            <div class="field span-2">
+              <label for="address">Endereço</label>
+              <input id="address" placeholder="Rua, número, bairro, cidade" />
+            </div>
+            <div class="field">
+              <label for="role">Cargo</label>
+              <input id="role" placeholder="Ex.: Tosador" list="roleSuggestions" />
+              <datalist id="roleSuggestions"></datalist>
+            </div>
+            <div class="field">
+              <label for="sector">Setor</label>
+              <input id="sector" placeholder="Ex.: Banho e Tosa" />
+            </div>
+            <div class="field">
+              <label for="hire_date">Data de admissão</label>
+              <input id="hire_date" type="date" />
+            </div>
+            <div class="field">
+              <label for="status">Status</label>
+              <select id="status">
+                <option value="ativo">Ativo</option>
+                <option value="experiencia">Experiência</option>
+                <option value="afastado">Afastado</option>
+                <option value="desligado">Desligado</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="contract_type">Tipo de contrato</label>
+              <select id="contract_type">
+                <option value="clt">CLT</option>
+                <option value="pj">PJ</option>
+                <option value="estagio">Estágio</option>
+                <option value="temporario">Temporário</option>
+                <option value="autonomo">Autônomo</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="salary">Salário</label>
+              <input id="salary" inputmode="decimal" placeholder="0,00" />
+            </div>
+            <div class="field">
+              <label for="emergency_name">Contato de emergência</label>
+              <input id="emergency_name" placeholder="Nome do contato" />
+            </div>
+            <div class="field">
+              <label for="emergency_phone">Telefone de emergência</label>
+              <input id="emergency_phone" maxlength="15" placeholder="(19) 99999-9999" />
+            </div>
+            <div class="field span-2">
+              <label for="notes">Observações</label>
+              <textarea id="notes" rows="4" placeholder="Informações internas, observações gerais, restrições, etc."></textarea>
+            </div>
+
+            <div class="form-actions span-2">
+              <button type="button" id="btnCancelEdit" class="btn btn-light">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Salvar funcionário</button>
+            </div>
+          </form>
+        </section>
+      </section>
+
+      <section id="view-settings" class="view">
+        <section class="panel narrow">
+          <div class="panel-header">
+            <h3>Configuração do Supabase</h3>
+          </div>
+          <div class="form-grid single-column">
+            <div class="field">
+              <label for="supabaseUrl">Supabase URL</label>
+              <input id="supabaseUrl" placeholder="https://xxxx.supabase.co" />
+            </div>
+            <div class="field">
+              <label for="supabaseKey">Anon Key</label>
+              <textarea id="supabaseKey" rows="4" placeholder="Cole aqui a chave pública anon"></textarea>
+            </div>
+            <div class="field">
+              <label for="storageBucket">Bucket de fotos</label>
+              <input id="storageBucket" placeholder="employee-photos" />
+            </div>
+            <div class="form-actions">
+              <button id="btnSaveSettings" class="btn btn-primary">Salvar configurações</button>
+              <button id="btnTestConnection" class="btn btn-ghost">Testar conexão</button>
+            </div>
+            <p class="muted">As configurações ficam salvas no navegador. Depois de publicar no GitHub Pages, basta configurar uma vez.</p>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <template id="employeeCardTemplate">
+    <article class="employee-card">
+      <div class="employee-top">
+        <img class="employee-avatar" alt="Foto" />
+        <div class="employee-meta">
+          <h4></h4>
+          <p class="employee-role"></p>
+          <p class="employee-sector"></p>
+        </div>
+        <span class="status-pill"></span>
+      </div>
+      <div class="employee-info"></div>
+      <div class="employee-actions">
+        <button class="btn btn-light btn-edit">Editar</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
 </body>
 </html>
