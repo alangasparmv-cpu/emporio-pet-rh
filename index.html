@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Empório Pet RH</title>
+  <meta name="theme-color" content="#ea7a18" />
+  <title>Empório Pet RH v6</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon-192.png" />
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -17,7 +20,7 @@
         <div class="brand-mark">EP</div>
         <div>
           <h1>Empório Pet RH</h1>
-          <p>Gestão de colaboradores</p>
+          <p>Versão 6 · RH profissional</p>
         </div>
       </div>
 
@@ -25,13 +28,17 @@
         <button class="nav-btn active" data-view="dashboard">Dashboard</button>
         <button class="nav-btn" data-view="employees">Funcionários</button>
         <button class="nav-btn" data-view="new">Novo cadastro</button>
+        <button class="nav-btn" data-view="documents">Documentos</button>
         <button class="nav-btn" data-view="settings">Configurações</button>
       </nav>
 
       <div class="cloud-card">
         <div class="cloud-title">Supabase</div>
         <p id="cloudStatus" class="cloud-status offline">Desconectado</p>
-        <button id="btnOpenSettings" class="btn btn-ghost btn-full">Configurar</button>
+        <div class="stack-sm">
+          <button id="btnOpenSettings" class="btn btn-ghost btn-full" type="button">Configurar</button>
+          <button id="btnInstallApp" class="btn btn-light btn-full hidden" type="button">Instalar app</button>
+        </div>
       </div>
     </aside>
 
@@ -39,54 +46,48 @@
       <header class="topbar">
         <div>
           <h2 id="pageTitle">Dashboard</h2>
-          <p id="pageSubtitle">Visão geral da equipe e alertas importantes.</p>
+          <p id="pageSubtitle">Visão geral da equipe, documentos e experiência.</p>
         </div>
         <div class="topbar-actions">
-          <button id="btnRefresh" class="btn btn-ghost">Atualizar</button>
-          <button id="btnNewEmployeeTop" class="btn btn-primary">Novo funcionário</button>
+          <button id="btnRefresh" class="btn btn-ghost" type="button">Atualizar</button>
+          <button id="btnNewEmployeeTop" class="btn btn-primary" type="button">Novo funcionário</button>
         </div>
       </header>
 
       <section id="view-dashboard" class="view active">
         <div class="dashboard-grid">
-          <article class="stat-card">
-            <span>Total</span>
-            <strong id="statTotal">0</strong>
-          </article>
-          <article class="stat-card">
-            <span>Ativos</span>
-            <strong id="statActive">0</strong>
-          </article>
-          <article class="stat-card">
-            <span>Experiência</span>
-            <strong id="statTrial">0</strong>
-          </article>
-          <article class="stat-card">
-            <span>Desligados</span>
-            <strong id="statInactive">0</strong>
-          </article>
+          <article class="stat-card"><span>Total</span><strong id="statTotal">0</strong></article>
+          <article class="stat-card"><span>Ativos</span><strong id="statActive">0</strong></article>
+          <article class="stat-card"><span>Experiência</span><strong id="statTrial">0</strong></article>
+          <article class="stat-card"><span>Desligados</span><strong id="statInactive">0</strong></article>
+          <article class="stat-card"><span>Docs salvos</span><strong id="statDocs">0</strong></article>
+          <article class="stat-card"><span>Aniversários mês</span><strong id="statBirthdays">0</strong></article>
         </div>
 
         <div class="panel-grid two-columns">
           <section class="panel">
-            <div class="panel-header">
-              <h3>Alertas de experiência</h3>
-            </div>
+            <div class="panel-header"><h3>Alertas de experiência</h3></div>
             <div id="trialAlerts" class="list-block empty-state-inline">Nenhum alerta no momento.</div>
           </section>
-
           <section class="panel">
-            <div class="panel-header">
-              <h3>Aniversariantes do mês</h3>
-            </div>
+            <div class="panel-header"><h3>Aniversariantes do mês</h3></div>
             <div id="birthdayList" class="list-block empty-state-inline">Nenhum aniversariante encontrado.</div>
           </section>
         </div>
 
+        <div class="panel-grid two-columns">
+          <section class="panel">
+            <div class="panel-header"><h3>Documentos recentes</h3></div>
+            <div id="recentDocuments" class="list-block empty-state-inline">Nenhum documento encontrado.</div>
+          </section>
+          <section class="panel">
+            <div class="panel-header"><h3>Modelos disponíveis</h3></div>
+            <div id="templateSummary" class="list-block empty-state-inline">Nenhum modelo cadastrado.</div>
+          </section>
+        </div>
+
         <section class="panel">
-          <div class="panel-header">
-            <h3>Funcionários recentes</h3>
-          </div>
+          <div class="panel-header"><h3>Funcionários recentes</h3></div>
           <div id="recentEmployees" class="cards-grid"></div>
         </section>
       </section>
@@ -130,8 +131,9 @@
 
       <section id="view-new" class="view">
         <section class="panel">
-          <div class="panel-header">
+          <div class="panel-header between">
             <h3 id="formTitle">Cadastro de funcionário</h3>
+            <button id="btnResetFormTop" class="btn btn-light" type="button">Novo cadastro limpo</button>
           </div>
           <form id="employeeForm" class="form-grid" autocomplete="off">
             <input type="hidden" id="employeeId" />
@@ -142,92 +144,37 @@
               </div>
               <div class="photo-actions">
                 <label class="btn btn-ghost btn-file">
-                  Enviar foto
-                  <input id="photoInput" type="file" accept="image/*" capture="environment" hidden />
+                  Buscar foto
+                  <input id="photoInput" type="file" accept="image/*" hidden />
+                </label>
+                <label class="btn btn-light btn-file">
+                  Tirar foto
+                  <input id="photoCameraInput" type="file" accept="image/*" capture="environment" hidden />
                 </label>
                 <button id="btnRemovePhoto" type="button" class="btn btn-light">Remover foto</button>
               </div>
             </div>
 
-            <div class="field">
-              <label for="full_name">Nome completo</label>
-              <input id="full_name" required />
-            </div>
-            <div class="field">
-              <label for="birth_date">Data de nascimento</label>
-              <input id="birth_date" type="date" />
-            </div>
-            <div class="field">
-              <label for="cpf">CPF</label>
-              <input id="cpf" maxlength="14" placeholder="000.000.000-00" />
-            </div>
-            <div class="field">
-              <label for="rg">RG</label>
-              <input id="rg" maxlength="20" placeholder="00.000.000-0" />
-            </div>
-            <div class="field">
-              <label for="phone">Telefone</label>
-              <input id="phone" maxlength="15" placeholder="(19) 3333-3333" />
-            </div>
-            <div class="field">
-              <label for="mobile">Celular</label>
-              <input id="mobile" maxlength="15" placeholder="(19) 99999-9999" />
-            </div>
-            <div class="field span-2">
-              <label for="email">E-mail</label>
-              <input id="email" type="email" placeholder="nome@empresa.com" />
-            </div>
-            <div class="field">
-              <label for="cep">CEP</label>
-              <input id="cep" maxlength="9" placeholder="00000-000" />
-            </div>
-            <div class="field">
-              <label>&nbsp;</label>
-              <button id="btnLookupCep" type="button" class="btn btn-ghost">Buscar CEP</button>
-            </div>
-            <div class="field span-2">
-              <label for="address_street">Rua / Logradouro</label>
-              <input id="address_street" placeholder="Rua, avenida, travessa..." />
-            </div>
-            <div class="field">
-              <label for="address_number">Número</label>
-              <input id="address_number" placeholder="123" />
-            </div>
-            <div class="field">
-              <label for="address_complement">Complemento</label>
-              <input id="address_complement" placeholder="Casa, apto, fundos..." />
-            </div>
-            <div class="field span-2">
-              <label for="address_neighborhood">Bairro</label>
-              <input id="address_neighborhood" placeholder="Centro" />
-            </div>
-            <div class="field">
-              <label for="address_city">Cidade</label>
-              <input id="address_city" placeholder="Leme" />
-            </div>
-            <div class="field">
-              <label for="address_state">Estado</label>
-              <input id="address_state" maxlength="2" placeholder="SP" />
-            </div>
-            <div class="field span-2">
-              <label for="address">Endereço completo</label>
-              <input id="address" placeholder="Preenchido automaticamente com base nos campos acima" readonly />
-            </div>
-            <div class="field">
-              <label for="role">Cargo</label>
-              <input id="role" placeholder="Ex.: Tosador" list="roleSuggestions" />
-              <datalist id="roleSuggestions"></datalist>
-            </div>
-            <div class="field">
-              <label for="sector">Setor</label>
-              <input id="sector" placeholder="Ex.: Banho e Tosa" />
-            </div>
-            <div class="field">
-              <label for="hire_date">Data de admissão</label>
-              <input id="hire_date" type="date" />
-            </div>
-            <div class="field">
-              <label for="status">Status</label>
+            <div class="field"><label for="full_name">Nome completo</label><input id="full_name" required /></div>
+            <div class="field"><label for="birth_date">Data de nascimento</label><input id="birth_date" type="date" /></div>
+            <div class="field"><label for="cpf">CPF</label><input id="cpf" maxlength="14" placeholder="000.000.000-00" /></div>
+            <div class="field"><label for="rg">RG</label><input id="rg" maxlength="20" placeholder="00.000.000-0" /></div>
+            <div class="field"><label for="phone">Telefone</label><input id="phone" maxlength="14" placeholder="(19) 3333-3333" /></div>
+            <div class="field"><label for="mobile">Celular</label><input id="mobile" maxlength="15" placeholder="(19) 99999-9999" /></div>
+            <div class="field span-2"><label for="email">E-mail</label><input id="email" type="email" placeholder="nome@empresa.com" /></div>
+            <div class="field"><label for="cep">CEP</label><input id="cep" maxlength="9" placeholder="00000-000" /></div>
+            <div class="field"><label>&nbsp;</label><button id="btnLookupCep" type="button" class="btn btn-ghost">Buscar CEP</button></div>
+            <div class="field span-2"><label for="address_street">Rua / Logradouro</label><input id="address_street" placeholder="Rua, avenida, travessa..." /></div>
+            <div class="field"><label for="address_number">Número</label><input id="address_number" placeholder="123" /></div>
+            <div class="field"><label for="address_complement">Complemento</label><input id="address_complement" placeholder="Casa, apto, fundos..." /></div>
+            <div class="field span-2"><label for="address_neighborhood">Bairro</label><input id="address_neighborhood" placeholder="Centro" /></div>
+            <div class="field"><label for="address_city">Cidade</label><input id="address_city" placeholder="Leme" /></div>
+            <div class="field"><label for="address_state">Estado</label><input id="address_state" maxlength="2" placeholder="SP" /></div>
+            <div class="field span-2"><label for="address">Endereço completo</label><input id="address" placeholder="Preenchido automaticamente" readonly /></div>
+            <div class="field"><label for="role">Cargo</label><input id="role" placeholder="Ex.: Tosador" list="roleSuggestions" /><datalist id="roleSuggestions"></datalist></div>
+            <div class="field"><label for="sector">Setor</label><input id="sector" placeholder="Ex.: Banho e Tosa" /></div>
+            <div class="field"><label for="hire_date">Data de admissão</label><input id="hire_date" type="date" /></div>
+            <div class="field"><label for="status">Status</label>
               <select id="status">
                 <option value="ativo">Ativo</option>
                 <option value="experiencia">Experiência</option>
@@ -235,8 +182,7 @@
                 <option value="desligado">Desligado</option>
               </select>
             </div>
-            <div class="field">
-              <label for="contract_type">Tipo de contrato</label>
+            <div class="field"><label for="contract_type">Tipo de contrato</label>
               <select id="contract_type">
                 <option value="clt">CLT</option>
                 <option value="pj">PJ</option>
@@ -245,54 +191,118 @@
                 <option value="autonomo">Autônomo</option>
               </select>
             </div>
-            <div class="field">
-              <label for="salary">Salário</label>
-              <input id="salary" inputmode="decimal" placeholder="0,00" />
-            </div>
-            <div class="field">
-              <label for="emergency_name">Contato de emergência</label>
-              <input id="emergency_name" placeholder="Nome do contato" />
-            </div>
-            <div class="field">
-              <label for="emergency_phone">Telefone de emergência</label>
-              <input id="emergency_phone" maxlength="15" placeholder="(19) 99999-9999" />
-            </div>
-            <div class="field span-2">
-              <label for="notes">Observações</label>
-              <textarea id="notes" rows="4" placeholder="Informações internas, observações gerais, restrições, etc."></textarea>
-            </div>
-
+            <div class="field"><label for="salary">Salário</label><input id="salary" type="number" step="0.01" min="0" placeholder="0,00" /></div>
+            <div class="field"><label for="emergency_name">Contato de emergência</label><input id="emergency_name" placeholder="Nome do contato" /></div>
+            <div class="field"><label for="emergency_phone">Telefone emergência</label><input id="emergency_phone" maxlength="15" placeholder="(19) 99999-9999" /></div>
+            <div class="field span-2"><label for="notes">Observações</label><textarea id="notes" rows="4" placeholder="Informações relevantes do colaborador"></textarea></div>
             <div class="form-actions span-2">
-              <button type="button" id="btnCancelEdit" class="btn btn-light">Cancelar</button>
-              <button type="submit" class="btn btn-primary">Salvar funcionário</button>
+              <button id="btnResetForm" type="button" class="btn btn-light">Limpar</button>
+              <button id="btnSaveEmployee" type="submit" class="btn btn-primary">Salvar funcionário</button>
             </div>
           </form>
         </section>
       </section>
 
-      <section id="view-settings" class="view">
-        <section class="panel narrow">
-          <div class="panel-header">
-            <h3>Configuração do Supabase</h3>
-          </div>
-          <div class="form-grid single-column">
-            <div class="field">
-              <label for="supabaseUrl">Supabase URL</label>
-              <input id="supabaseUrl" placeholder="https://xxxx.supabase.co" />
+      <section id="view-documents" class="view">
+        <div class="panel-grid two-columns docs-layout">
+          <section class="panel">
+            <div class="panel-header between">
+              <h3>Modelos para impressão</h3>
+              <button id="btnNewTemplate" class="btn btn-primary" type="button">Novo modelo</button>
             </div>
             <div class="field">
-              <label for="supabaseKey">Anon Key</label>
-              <textarea id="supabaseKey" rows="4" placeholder="Cole aqui a chave pública anon"></textarea>
+              <label for="templateSelect">Modelos salvos</label>
+              <select id="templateSelect"><option value="">Selecione um modelo</option></select>
+            </div>
+            <div class="field"><label for="templateTitle">Título do modelo</label><input id="templateTitle" placeholder="Ex.: Ficha de admissão" /></div>
+            <div class="field"><label for="templateCategory">Categoria</label><input id="templateCategory" placeholder="Ex.: RH / Admissão / Advertência" /></div>
+            <div class="field"><label for="templateContent">Conteúdo do modelo</label>
+              <textarea id="templateContent" rows="16" placeholder="Cole aqui o texto do seu modelo. Use variáveis como {{full_name}}, {{cpf}}, {{role}}, {{address}}, {{today}}."></textarea>
             </div>
             <div class="field">
-              <label for="storageBucket">Bucket de fotos</label>
-              <input id="storageBucket" placeholder="employee-photos" />
+              <label>Variáveis prontas</label>
+              <div class="tag-list" id="templateVars"></div>
             </div>
             <div class="form-actions">
-              <button id="btnSaveSettings" class="btn btn-primary">Salvar configurações</button>
-              <button id="btnTestConnection" class="btn btn-ghost">Testar conexão</button>
+              <button id="btnDeleteTemplate" type="button" class="btn btn-light">Excluir modelo</button>
+              <button id="btnSaveTemplate" type="button" class="btn btn-primary">Salvar modelo</button>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header"><h3>Gerar documento</h3></div>
+            <div class="field"><label for="docEmployeeSelect">Funcionário</label><select id="docEmployeeSelect"><option value="">Selecione</option></select></div>
+            <div class="field"><label for="docTemplateSelect">Modelo</label><select id="docTemplateSelect"><option value="">Selecione</option></select></div>
+            <div class="field"><label for="docType">Tipo do arquivo</label><input id="docType" placeholder="Ex.: Contrato, recibo, advertência" /></div>
+            <div class="field"><label for="docGeneratedContent">Pré-visualização</label><textarea id="docGeneratedContent" rows="18"></textarea></div>
+            <div class="form-actions">
+              <button id="btnPreviewDocument" type="button" class="btn btn-light">Atualizar prévia</button>
+              <button id="btnPrintDocument" type="button" class="btn btn-primary">Imprimir</button>
+            </div>
+            <hr class="line">
+            <div class="panel-header between"><h3>Anexar arquivo do funcionário</h3></div>
+            <div class="field"><label for="uploadEmployeeSelect">Funcionário</label><select id="uploadEmployeeSelect"><option value="">Selecione</option></select></div>
+            <div class="field"><label for="uploadDocumentType">Tipo de documento</label><input id="uploadDocumentType" placeholder="Ex.: RG, CPF, contrato" /></div>
+            <div class="field"><label class="btn btn-ghost btn-file">Selecionar arquivo<input id="documentFileInput" type="file" hidden /></label></div>
+            <div class="form-actions"><button id="btnUploadDocument" type="button" class="btn btn-primary">Enviar documento</button></div>
+          </section>
+        </div>
+
+        <section class="panel">
+          <div class="panel-header"><h3>Documentos salvos</h3></div>
+          <div id="documentList" class="cards-grid"></div>
+        </section>
+      </section>
+
+      <section id="view-settings" class="view">
+        <section class="panel narrow">
+          <div class="panel-header"><h3>Configuração do Supabase</h3></div>
+          <div class="form-grid single-column">
+            <div class="field"><label for="sbUrl">Supabase URL</label><input id="sbUrl" placeholder="https://xxxx.supabase.co" /></div>
+            <div class="field"><label for="sbKey">Anon Key / Publishable key</label><textarea id="sbKey" rows="4" placeholder="Cole aqui a chave pública"></textarea></div>
+            <div class="field"><label for="sbBucket">Bucket de fotos</label><input id="sbBucket" value="employee-photos" /></div>
+            <div class="field"><label for="sbDocsBucket">Bucket de documentos</label><input id="sbDocsBucket" value="employee-documents" /></div>
+            <div class="form-actions">
+              <button id="btnSaveConfig" type="button" class="btn btn-primary">Salvar configurações</button>
+              <button id="btnTestConfig" type="button" class="btn btn-ghost">Testar conexão</button>
             </div>
             <p class="muted">As configurações ficam salvas no navegador. Depois de publicar no GitHub Pages, basta configurar uma vez.</p>
+          </div>
+        </section>
+      </section>
+
+      <section id="view-detail" class="view">
+        <section class="panel">
+          <div class="panel-header between">
+            <h3>Ficha completa do funcionário</h3>
+            <div class="stack-row">
+              <button id="btnBackToEmployees" class="btn btn-light" type="button">Voltar</button>
+              <button id="btnEditFromDetail" class="btn btn-primary" type="button">Editar</button>
+            </div>
+          </div>
+          <div id="detailEmpty" class="empty-state-inline">Selecione um funcionário para visualizar a ficha completa.</div>
+          <div id="detailContent" class="hidden">
+            <div class="detail-hero">
+              <img id="detailPhoto" class="detail-photo" alt="Foto do funcionário" />
+              <div class="detail-meta">
+                <h2 id="detailName">-</h2>
+                <p id="detailRoleSector">-</p>
+                <div class="stack-row wrap">
+                  <span id="detailStatus" class="status-pill">-</span>
+                  <span id="detailContract" class="badge">-</span>
+                </div>
+              </div>
+            </div>
+            <div class="detail-tabs">
+              <button class="tab-btn active" data-tab="personal" type="button">Dados pessoais</button>
+              <button class="tab-btn" data-tab="professional" type="button">Dados profissionais</button>
+              <button class="tab-btn" data-tab="documents" type="button">Documentos</button>
+              <button class="tab-btn" data-tab="print" type="button">Impressão</button>
+            </div>
+            <div class="tab-content active" id="tab-personal"></div>
+            <div class="tab-content" id="tab-professional"></div>
+            <div class="tab-content" id="tab-documents"></div>
+            <div class="tab-content" id="tab-print"></div>
           </div>
         </section>
       </section>
@@ -300,25 +310,6 @@
   </div>
 
   <div id="toast" class="toast"></div>
-
-  <template id="employeeCardTemplate">
-    <article class="employee-card">
-      <div class="employee-top">
-        <img class="employee-avatar" alt="Foto" />
-        <div class="employee-meta">
-          <h4></h4>
-          <p class="employee-role"></p>
-          <p class="employee-sector"></p>
-        </div>
-        <span class="status-pill"></span>
-      </div>
-      <div class="employee-info"></div>
-      <div class="employee-actions">
-        <button class="btn btn-light btn-edit">Editar</button>
-      </div>
-    </article>
-  </template>
-
   <script src="app.js"></script>
 </body>
 </html>
