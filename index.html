@@ -24,8 +24,32 @@
 
     <div class="card hidden" id="panel">
       <h2>Painel</h2>
-      <button onclick="loadEmployees()">Ver Funcionários</button>
+
+      <h3>Cadastrar funcionário</h3>
+
+      <input id="full_name" type="text" placeholder="Nome completo" />
+      <input id="cpf" type="text" placeholder="CPF" />
+      <input id="rg" type="text" placeholder="RG" />
+      <input id="role" type="text" placeholder="Cargo / Função" />
+      <input id="phone" type="text" placeholder="Telefone" />
+      <input id="mobile" type="text" placeholder="Celular" />
+      <input id="admission_date" type="date" placeholder="Data de admissão" />
+      <input id="ctps_number" type="text" placeholder="CTPS número" />
+      <input id="ctps_series" type="text" placeholder="CTPS série" />
+      <input id="city" type="text" placeholder="Cidade" />
+      <input id="state" type="text" placeholder="UF" />
+
+      <button onclick="saveEmployee()">Salvar funcionário</button>
+
+      <p id="employeeMsg"></p>
+
+      <hr style="margin: 24px 0;">
+
+      <h3>Funcionários cadastrados</h3>
+
+      <button onclick="loadEmployees()">Atualizar lista</button>
       <pre id="result"></pre>
+
       <button onclick="logout()">Sair</button>
     </div>
   </div>
@@ -56,6 +80,7 @@
       if (data?.session) {
         msg.innerText = "Login realizado com sucesso";
         document.getElementById("panel").classList.remove("hidden");
+        loadEmployees();
       } else {
         msg.innerText = "Login sem sessão retornada";
       }
@@ -68,14 +93,68 @@
       document.getElementById("msg").innerText = "Sessão encerrada";
     }
 
+    async function saveEmployee() {
+      const employeeMsg = document.getElementById("employeeMsg");
+
+      const employee = {
+        full_name: document.getElementById("full_name").value.trim(),
+        cpf: document.getElementById("cpf").value.trim(),
+        rg: document.getElementById("rg").value.trim(),
+        role: document.getElementById("role").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        mobile: document.getElementById("mobile").value.trim(),
+        admission_date: document.getElementById("admission_date").value || null,
+        ctps_number: document.getElementById("ctps_number").value.trim(),
+        ctps_series: document.getElementById("ctps_series").value.trim(),
+        city: document.getElementById("city").value.trim(),
+        state: document.getElementById("state").value.trim()
+      };
+
+      if (!employee.full_name) {
+        employeeMsg.innerText = "Preencha pelo menos o nome do funcionário.";
+        employeeMsg.style.color = "crimson";
+        return;
+      }
+
+      employeeMsg.innerText = "Salvando...";
+      employeeMsg.style.color = "black";
+
+      const { error } = await supabaseClient
+        .from("employees")
+        .insert([employee]);
+
+      if (error) {
+        employeeMsg.innerText = "Erro ao salvar: " + error.message;
+        employeeMsg.style.color = "crimson";
+        return;
+      }
+
+      employeeMsg.innerText = "Funcionário salvo com sucesso.";
+      employeeMsg.style.color = "green";
+
+      document.getElementById("full_name").value = "";
+      document.getElementById("cpf").value = "";
+      document.getElementById("rg").value = "";
+      document.getElementById("role").value = "";
+      document.getElementById("phone").value = "";
+      document.getElementById("mobile").value = "";
+      document.getElementById("admission_date").value = "";
+      document.getElementById("ctps_number").value = "";
+      document.getElementById("ctps_series").value = "";
+      document.getElementById("city").value = "";
+      document.getElementById("state").value = "";
+
+      loadEmployees();
+    }
+
     async function loadEmployees() {
       const result = document.getElementById("result");
       result.innerText = "Carregando...";
 
       const { data, error } = await supabaseClient
         .from("employees")
-        .select("*")
-        .limit(10);
+        .select("id, full_name, cpf, role, admission_date, city, state")
+        .order("created_at", { ascending: false });
 
       if (error) {
         result.innerText = "Erro: " + error.message;
@@ -84,6 +163,18 @@
 
       result.innerText = JSON.stringify(data, null, 2);
     }
+
+    async function checkSession() {
+      const { data } = await supabaseClient.auth.getSession();
+
+      if (data?.session) {
+        document.getElementById("panel").classList.remove("hidden");
+        document.getElementById("msg").innerText = "Sessão já iniciada";
+        loadEmployees();
+      }
+    }
+
+    checkSession();
   </script>
 </body>
 </html>
