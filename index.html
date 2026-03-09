@@ -3,313 +3,337 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#ea7a18" />
-  <title>Empório Pet RH v6</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>Empório Pet RH v7</title>
+  <meta name="theme-color" content="#ff7a18" />
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="icon" href="icon-192.png" />
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark">EP</div>
-        <div>
-          <h1>Empório Pet RH</h1>
-          <p>Versão 6 · RH profissional</p>
+  <div id="app-shell">
+    <section id="login-screen" class="screen active center-screen">
+      <div class="card auth-card">
+        <div class="brand-mark">🐾</div>
+        <h1>Empório Pet RH</h1>
+        <p class="muted">Versão 7 • acesso administrativo</p>
+
+        <div id="setup-box" class="notice hidden">
+          <strong>Primeiro acesso</strong>
+          <p>Defina o e-mail e a senha do administrador. Esses dados ficam salvos neste navegador.</p>
         </div>
+
+        <div class="form-grid one-col">
+          <label for="login-email">E-mail</label>
+          <input id="login-email" type="email" placeholder="admin@emporiopet" autocomplete="username" />
+
+          <label for="login-password">Senha</label>
+          <div class="input-inline">
+            <input id="login-password" type="password" placeholder="Digite sua senha" autocomplete="current-password" />
+            <button type="button" id="toggle-login-pass" class="secondary small-btn">Ver</button>
+          </div>
+        </div>
+
+        <div class="auth-actions">
+          <button id="btn-login" class="primary">Entrar</button>
+          <button id="btn-create-admin" class="secondary hidden">Criar administrador</button>
+        </div>
+        <p id="login-message" class="helper"></p>
       </div>
+    </section>
 
-      <nav class="side-nav">
-        <button class="nav-btn active" data-view="dashboard">Dashboard</button>
-        <button class="nav-btn" data-view="employees">Funcionários</button>
-        <button class="nav-btn" data-view="new">Novo cadastro</button>
-        <button class="nav-btn" data-view="documents">Documentos</button>
-        <button class="nav-btn" data-view="settings">Configurações</button>
-      </nav>
-
-      <div class="cloud-card">
-        <div class="cloud-title">Supabase</div>
-        <p id="cloudStatus" class="cloud-status offline">Desconectado</p>
-        <div class="stack-sm">
-          <button id="btnOpenSettings" class="btn btn-ghost btn-full" type="button">Configurar</button>
-          <button id="btnInstallApp" class="btn btn-light btn-full hidden" type="button">Instalar app</button>
-        </div>
-      </div>
-    </aside>
-
-    <main class="main-content">
-      <header class="topbar">
-        <div>
-          <h2 id="pageTitle">Dashboard</h2>
-          <p id="pageSubtitle">Visão geral da equipe, documentos e experiência.</p>
-        </div>
-        <div class="topbar-actions">
-          <button id="btnRefresh" class="btn btn-ghost" type="button">Atualizar</button>
-          <button id="btnNewEmployeeTop" class="btn btn-primary" type="button">Novo funcionário</button>
-        </div>
-      </header>
-
-      <section id="view-dashboard" class="view active">
-        <div class="dashboard-grid">
-          <article class="stat-card"><span>Total</span><strong id="statTotal">0</strong></article>
-          <article class="stat-card"><span>Ativos</span><strong id="statActive">0</strong></article>
-          <article class="stat-card"><span>Experiência</span><strong id="statTrial">0</strong></article>
-          <article class="stat-card"><span>Desligados</span><strong id="statInactive">0</strong></article>
-          <article class="stat-card"><span>Docs salvos</span><strong id="statDocs">0</strong></article>
-          <article class="stat-card"><span>Aniversários mês</span><strong id="statBirthdays">0</strong></article>
+    <section id="main-app" class="screen hidden">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="brand-mark small">🐾</div>
+          <div>
+            <h2>Empório Pet RH</h2>
+            <p class="muted" id="logged-user-label">Administrador</p>
+          </div>
         </div>
 
-        <div class="panel-grid two-columns">
-          <section class="panel">
-            <div class="panel-header"><h3>Alertas de experiência</h3></div>
-            <div id="trialAlerts" class="list-block empty-state-inline">Nenhum alerta no momento.</div>
-          </section>
-          <section class="panel">
-            <div class="panel-header"><h3>Aniversariantes do mês</h3></div>
-            <div id="birthdayList" class="list-block empty-state-inline">Nenhum aniversariante encontrado.</div>
-          </section>
+        <nav class="nav-menu">
+          <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+          <button class="nav-btn" data-view="employees">Funcionários</button>
+          <button class="nav-btn" data-view="documents">Documentos</button>
+          <button class="nav-btn" data-view="reports">Relatórios</button>
+          <button class="nav-btn" data-view="settings">Configurações</button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <button id="btn-logout" class="danger-outline">Sair</button>
         </div>
+      </aside>
 
-        <div class="panel-grid two-columns">
-          <section class="panel">
-            <div class="panel-header"><h3>Documentos recentes</h3></div>
-            <div id="recentDocuments" class="list-block empty-state-inline">Nenhum documento encontrado.</div>
-          </section>
-          <section class="panel">
-            <div class="panel-header"><h3>Modelos disponíveis</h3></div>
-            <div id="templateSummary" class="list-block empty-state-inline">Nenhum modelo cadastrado.</div>
-          </section>
-        </div>
-
-        <section class="panel">
-          <div class="panel-header"><h3>Funcionários recentes</h3></div>
-          <div id="recentEmployees" class="cards-grid"></div>
-        </section>
-      </section>
-
-      <section id="view-employees" class="view">
-        <section class="panel">
-          <div class="filters-grid">
-            <div class="field grow">
-              <label for="searchInput">Buscar</label>
-              <input id="searchInput" type="text" placeholder="Nome, CPF, cargo, telefone..." />
+      <main class="content">
+        <section id="view-dashboard" class="view active">
+          <div class="page-header">
+            <div>
+              <h1>Dashboard RH</h1>
+              <p class="muted">Visão geral dos colaboradores e alertas</p>
             </div>
-            <div class="field">
-              <label for="filterStatus">Status</label>
-              <select id="filterStatus">
-                <option value="">Todos</option>
+            <div class="header-actions">
+              <button id="btn-refresh" class="secondary">Atualizar dados</button>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card"><span>Total</span><strong id="stat-total">0</strong></div>
+            <div class="stat-card"><span>Ativos</span><strong id="stat-active">0</strong></div>
+            <div class="stat-card"><span>Afastados</span><strong id="stat-away">0</strong></div>
+            <div class="stat-card"><span>Desligados</span><strong id="stat-dismissed">0</strong></div>
+            <div class="stat-card"><span>Experiência vencendo</span><strong id="stat-trial">0</strong></div>
+            <div class="stat-card"><span>Aniversariantes do mês</span><strong id="stat-birthdays">0</strong></div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="card">
+              <h3>Alertas</h3>
+              <div id="alerts-list" class="list-stack"></div>
+            </div>
+            <div class="card">
+              <h3>Últimas movimentações</h3>
+              <div id="history-list" class="list-stack"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-employees" class="view hidden">
+          <div class="page-header">
+            <div>
+              <h1>Funcionários</h1>
+              <p class="muted">Cadastro, edição, foto, status e documentos</p>
+            </div>
+            <div class="header-actions">
+              <button id="btn-new-employee" class="primary">Novo funcionário</button>
+            </div>
+          </div>
+
+          <div class="card toolbar-card">
+            <div class="toolbar-grid">
+              <input id="search-employee" type="text" placeholder="Buscar por nome, cargo, CPF ou telefone" />
+              <select id="filter-status">
+                <option value="">Todos os status</option>
                 <option value="ativo">Ativo</option>
-                <option value="experiencia">Experiência</option>
                 <option value="afastado">Afastado</option>
                 <option value="desligado">Desligado</option>
               </select>
-            </div>
-            <div class="field">
-              <label for="filterSector">Setor</label>
-              <input id="filterSector" type="text" placeholder="Ex.: Banho e Tosa" />
-            </div>
-            <div class="field">
-              <label for="filterRole">Cargo</label>
-              <input id="filterRole" type="text" placeholder="Ex.: Tosador" />
+              <button id="btn-export-csv" class="secondary">Exportar CSV</button>
             </div>
           </div>
+
+          <div id="employee-list" class="employee-grid"></div>
         </section>
 
-        <section class="panel">
-          <div class="panel-header between">
-            <h3>Lista de funcionários</h3>
-            <span id="listCount" class="badge">0 registros</span>
+        <section id="view-documents" class="view hidden">
+          <div class="page-header">
+            <div>
+              <h1>Documentos</h1>
+              <p class="muted">Modelos prontos para impressão e anexos dos funcionários</p>
+            </div>
           </div>
-          <div id="employeeList" class="cards-grid"></div>
-        </section>
-      </section>
 
-      <section id="view-new" class="view">
-        <section class="panel">
-          <div class="panel-header between">
-            <h3 id="formTitle">Cadastro de funcionário</h3>
-            <button id="btnResetFormTop" class="btn btn-light" type="button">Novo cadastro limpo</button>
-          </div>
-          <form id="employeeForm" class="form-grid" autocomplete="off">
-            <input type="hidden" id="employeeId" />
-            <div class="photo-section">
-              <div class="photo-preview-wrap">
-                <img id="photoPreview" class="photo-preview" alt="Foto do funcionário" src="" />
-                <div id="photoPlaceholder" class="photo-placeholder">Sem foto</div>
-              </div>
-              <div class="photo-actions">
-                <label class="btn btn-ghost btn-file">
-                  Buscar foto
-                  <input id="photoInput" type="file" accept="image/*" hidden />
-                </label>
-                <label class="btn btn-light btn-file">
-                  Tirar foto
-                  <input id="photoCameraInput" type="file" accept="image/*" capture="environment" hidden />
-                </label>
-                <button id="btnRemovePhoto" type="button" class="btn btn-light">Remover foto</button>
+          <div class="two-col">
+            <div class="card">
+              <h3>Gerar documento para impressão</h3>
+              <div class="form-grid one-col">
+                <label for="doc-employee-select">Funcionário</label>
+                <select id="doc-employee-select"></select>
+                <label for="doc-template-select">Modelo</label>
+                <select id="doc-template-select"></select>
+                <button id="btn-render-doc" class="secondary">Atualizar prévia</button>
+                <button id="btn-print-doc" class="primary">Imprimir</button>
               </div>
             </div>
-
-            <div class="field"><label for="full_name">Nome completo</label><input id="full_name" required /></div>
-            <div class="field"><label for="birth_date">Data de nascimento</label><input id="birth_date" type="date" /></div>
-            <div class="field"><label for="cpf">CPF</label><input id="cpf" maxlength="14" placeholder="000.000.000-00" /></div>
-            <div class="field"><label for="rg">RG</label><input id="rg" maxlength="20" placeholder="00.000.000-0" /></div>
-            <div class="field"><label for="phone">Telefone</label><input id="phone" maxlength="14" placeholder="(19) 3333-3333" /></div>
-            <div class="field"><label for="mobile">Celular</label><input id="mobile" maxlength="15" placeholder="(19) 99999-9999" /></div>
-            <div class="field span-2"><label for="email">E-mail</label><input id="email" type="email" placeholder="nome@empresa.com" /></div>
-            <div class="field"><label for="cep">CEP</label><input id="cep" maxlength="9" placeholder="00000-000" /></div>
-            <div class="field"><label>&nbsp;</label><button id="btnLookupCep" type="button" class="btn btn-ghost">Buscar CEP</button></div>
-            <div class="field span-2"><label for="address_street">Rua / Logradouro</label><input id="address_street" placeholder="Rua, avenida, travessa..." /></div>
-            <div class="field"><label for="address_number">Número</label><input id="address_number" placeholder="123" /></div>
-            <div class="field"><label for="address_complement">Complemento</label><input id="address_complement" placeholder="Casa, apto, fundos..." /></div>
-            <div class="field span-2"><label for="address_neighborhood">Bairro</label><input id="address_neighborhood" placeholder="Centro" /></div>
-            <div class="field"><label for="address_city">Cidade</label><input id="address_city" placeholder="Leme" /></div>
-            <div class="field"><label for="address_state">Estado</label><input id="address_state" maxlength="2" placeholder="SP" /></div>
-            <div class="field span-2"><label for="address">Endereço completo</label><input id="address" placeholder="Preenchido automaticamente" readonly /></div>
-            <div class="field"><label for="role">Cargo</label><input id="role" placeholder="Ex.: Tosador" list="roleSuggestions" /><datalist id="roleSuggestions"></datalist></div>
-            <div class="field"><label for="sector">Setor</label><input id="sector" placeholder="Ex.: Banho e Tosa" /></div>
-            <div class="field"><label for="hire_date">Data de admissão</label><input id="hire_date" type="date" /></div>
-            <div class="field"><label for="status">Status</label>
-              <select id="status">
-                <option value="ativo">Ativo</option>
-                <option value="experiencia">Experiência</option>
-                <option value="afastado">Afastado</option>
-                <option value="desligado">Desligado</option>
-              </select>
-            </div>
-            <div class="field"><label for="contract_type">Tipo de contrato</label>
-              <select id="contract_type">
-                <option value="clt">CLT</option>
-                <option value="pj">PJ</option>
-                <option value="estagio">Estágio</option>
-                <option value="temporario">Temporário</option>
-                <option value="autonomo">Autônomo</option>
-              </select>
-            </div>
-            <div class="field"><label for="salary">Salário</label><input id="salary" type="number" step="0.01" min="0" placeholder="0,00" /></div>
-            <div class="field"><label for="emergency_name">Contato de emergência</label><input id="emergency_name" placeholder="Nome do contato" /></div>
-            <div class="field"><label for="emergency_phone">Telefone emergência</label><input id="emergency_phone" maxlength="15" placeholder="(19) 99999-9999" /></div>
-            <div class="field span-2"><label for="notes">Observações</label><textarea id="notes" rows="4" placeholder="Informações relevantes do colaborador"></textarea></div>
-            <div class="form-actions span-2">
-              <button id="btnResetForm" type="button" class="btn btn-light">Limpar</button>
-              <button id="btnSaveEmployee" type="submit" class="btn btn-primary">Salvar funcionário</button>
-            </div>
-          </form>
-        </section>
-      </section>
-
-      <section id="view-documents" class="view">
-        <div class="panel-grid two-columns docs-layout">
-          <section class="panel">
-            <div class="panel-header between">
-              <h3>Modelos para impressão</h3>
-              <button id="btnNewTemplate" class="btn btn-primary" type="button">Novo modelo</button>
-            </div>
-            <div class="field">
-              <label for="templateSelect">Modelos salvos</label>
-              <select id="templateSelect"><option value="">Selecione um modelo</option></select>
-            </div>
-            <div class="field"><label for="templateTitle">Título do modelo</label><input id="templateTitle" placeholder="Ex.: Ficha de admissão" /></div>
-            <div class="field"><label for="templateCategory">Categoria</label><input id="templateCategory" placeholder="Ex.: RH / Admissão / Advertência" /></div>
-            <div class="field"><label for="templateContent">Conteúdo do modelo</label>
-              <textarea id="templateContent" rows="16" placeholder="Cole aqui o texto do seu modelo. Use variáveis como {{full_name}}, {{cpf}}, {{role}}, {{address}}, {{today}}."></textarea>
-            </div>
-            <div class="field">
-              <label>Variáveis prontas</label>
-              <div class="tag-list" id="templateVars"></div>
-            </div>
-            <div class="form-actions">
-              <button id="btnDeleteTemplate" type="button" class="btn btn-light">Excluir modelo</button>
-              <button id="btnSaveTemplate" type="button" class="btn btn-primary">Salvar modelo</button>
-            </div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-header"><h3>Gerar documento</h3></div>
-            <div class="field"><label for="docEmployeeSelect">Funcionário</label><select id="docEmployeeSelect"><option value="">Selecione</option></select></div>
-            <div class="field"><label for="docTemplateSelect">Modelo</label><select id="docTemplateSelect"><option value="">Selecione</option></select></div>
-            <div class="field"><label for="docType">Tipo do arquivo</label><input id="docType" placeholder="Ex.: Contrato, recibo, advertência" /></div>
-            <div class="field"><label for="docGeneratedContent">Pré-visualização</label><textarea id="docGeneratedContent" rows="18"></textarea></div>
-            <div class="form-actions">
-              <button id="btnPreviewDocument" type="button" class="btn btn-light">Atualizar prévia</button>
-              <button id="btnPrintDocument" type="button" class="btn btn-primary">Imprimir</button>
-            </div>
-            <hr class="line">
-            <div class="panel-header between"><h3>Anexar arquivo do funcionário</h3></div>
-            <div class="field"><label for="uploadEmployeeSelect">Funcionário</label><select id="uploadEmployeeSelect"><option value="">Selecione</option></select></div>
-            <div class="field"><label for="uploadDocumentType">Tipo de documento</label><input id="uploadDocumentType" placeholder="Ex.: RG, CPF, contrato" /></div>
-            <div class="field"><label class="btn btn-ghost btn-file">Selecionar arquivo<input id="documentFileInput" type="file" hidden /></label></div>
-            <div class="form-actions"><button id="btnUploadDocument" type="button" class="btn btn-primary">Enviar documento</button></div>
-          </section>
-        </div>
-
-        <section class="panel">
-          <div class="panel-header"><h3>Documentos salvos</h3></div>
-          <div id="documentList" class="cards-grid"></div>
-        </section>
-      </section>
-
-      <section id="view-settings" class="view">
-        <section class="panel narrow">
-          <div class="panel-header"><h3>Configuração do Supabase</h3></div>
-          <div class="form-grid single-column">
-            <div class="field"><label for="sbUrl">Supabase URL</label><input id="sbUrl" placeholder="https://xxxx.supabase.co" /></div>
-            <div class="field"><label for="sbKey">Anon Key / Publishable key</label><textarea id="sbKey" rows="4" placeholder="Cole aqui a chave pública"></textarea></div>
-            <div class="field"><label for="sbBucket">Bucket de fotos</label><input id="sbBucket" value="employee-photos" /></div>
-            <div class="field"><label for="sbDocsBucket">Bucket de documentos</label><input id="sbDocsBucket" value="employee-documents" /></div>
-            <div class="form-actions">
-              <button id="btnSaveConfig" type="button" class="btn btn-primary">Salvar configurações</button>
-              <button id="btnTestConfig" type="button" class="btn btn-ghost">Testar conexão</button>
-            </div>
-            <p class="muted">As configurações ficam salvas no navegador. Depois de publicar no GitHub Pages, basta configurar uma vez.</p>
-          </div>
-        </section>
-      </section>
-
-      <section id="view-detail" class="view">
-        <section class="panel">
-          <div class="panel-header between">
-            <h3>Ficha completa do funcionário</h3>
-            <div class="stack-row">
-              <button id="btnBackToEmployees" class="btn btn-light" type="button">Voltar</button>
-              <button id="btnEditFromDetail" class="btn btn-primary" type="button">Editar</button>
+            <div class="card">
+              <h3>Prévia</h3>
+              <div id="doc-preview" class="preview-box"></div>
             </div>
           </div>
-          <div id="detailEmpty" class="empty-state-inline">Selecione um funcionário para visualizar a ficha completa.</div>
-          <div id="detailContent" class="hidden">
-            <div class="detail-hero">
-              <img id="detailPhoto" class="detail-photo" alt="Foto do funcionário" />
-              <div class="detail-meta">
-                <h2 id="detailName">-</h2>
-                <p id="detailRoleSector">-</p>
-                <div class="stack-row wrap">
-                  <span id="detailStatus" class="status-pill">-</span>
-                  <span id="detailContract" class="badge">-</span>
+
+          <div class="card mt-16">
+            <h3>Modelos cadastrados</h3>
+            <div class="form-grid one-col">
+              <label for="template-name">Nome do modelo</label>
+              <input id="template-name" type="text" placeholder="Ex.: Ficha cadastral" />
+              <label for="template-content">Conteúdo do modelo</label>
+              <textarea id="template-content" rows="10" placeholder="Use variáveis como {{full_name}}, {{cpf}}, {{role}}, {{address}}, {{today}}"></textarea>
+              <div class="header-actions">
+                <button id="btn-save-template" class="primary">Salvar modelo</button>
+                <button id="btn-load-default-templates" class="secondary">Carregar modelos padrão</button>
+              </div>
+            </div>
+            <div id="templates-list" class="list-stack mt-16"></div>
+          </div>
+        </section>
+
+        <section id="view-reports" class="view hidden">
+          <div class="page-header">
+            <div>
+              <h1>Relatórios</h1>
+              <p class="muted">Exportações e auditoria de uso</p>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="card">
+              <h3>Exportações</h3>
+              <div class="list-stack">
+                <button id="btn-export-detailed-csv" class="secondary">Exportar funcionários completos (CSV)</button>
+                <button id="btn-export-history-csv" class="secondary">Exportar histórico (CSV)</button>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Orientações</h3>
+              <ul class="simple-list">
+                <li>Use o status <strong>desligado</strong> em vez de excluir sempre que possível.</li>
+                <li>Exclusão definitiva remove o cadastro do banco e não pode ser desfeita.</li>
+                <li>Os documentos impressos usam os modelos salvos no navegador.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-settings" class="view hidden">
+          <div class="page-header">
+            <div>
+              <h1>Configurações</h1>
+              <p class="muted">Conexão com Supabase e segurança do sistema</p>
+            </div>
+          </div>
+
+          <div id="settings-lock" class="card">
+            <h3>Área protegida</h3>
+            <p>Digite a senha do administrador para acessar as configurações.</p>
+            <div class="form-grid one-col">
+              <label for="settings-password">Senha</label>
+              <input id="settings-password" type="password" placeholder="Senha do administrador" />
+              <button id="btn-unlock-settings" class="primary">Desbloquear</button>
+              <p id="settings-message" class="helper"></p>
+            </div>
+          </div>
+
+          <div id="settings-panel" class="hidden">
+            <div class="card">
+              <div class="form-grid one-col">
+                <label for="supabase-url">Supabase URL</label>
+                <input id="supabase-url" type="text" placeholder="https://seu-projeto.supabase.co" />
+
+                <label for="supabase-key">Publishable / Anon Key</label>
+                <input id="supabase-key" type="text" placeholder="sb_publishable_..." />
+
+                <label for="bucket-photos">Bucket de fotos</label>
+                <input id="bucket-photos" type="text" value="employee-photos" />
+
+                <label for="bucket-docs">Bucket de documentos</label>
+                <input id="bucket-docs" type="text" value="employee-documents" />
+
+                <div class="header-actions">
+                  <button id="btn-save-settings" class="primary">Salvar configurações</button>
+                  <button id="btn-test-connection" class="secondary">Testar conexão</button>
                 </div>
+                <p id="connection-result" class="helper"></p>
               </div>
             </div>
-            <div class="detail-tabs">
-              <button class="tab-btn active" data-tab="personal" type="button">Dados pessoais</button>
-              <button class="tab-btn" data-tab="professional" type="button">Dados profissionais</button>
-              <button class="tab-btn" data-tab="documents" type="button">Documentos</button>
-              <button class="tab-btn" data-tab="print" type="button">Impressão</button>
-            </div>
-            <div class="tab-content active" id="tab-personal"></div>
-            <div class="tab-content" id="tab-professional"></div>
-            <div class="tab-content" id="tab-documents"></div>
-            <div class="tab-content" id="tab-print"></div>
           </div>
         </section>
-      </section>
-    </main>
+      </main>
+    </section>
   </div>
 
-  <div id="toast" class="toast"></div>
+  <div id="employee-modal" class="modal hidden">
+    <div class="modal-backdrop" data-close-modal="true"></div>
+    <div class="modal-card large">
+      <div class="modal-header">
+        <h2 id="employee-modal-title">Novo funcionário</h2>
+        <button class="close-btn" data-close-modal="true">×</button>
+      </div>
+
+      <form id="employee-form" class="modal-body">
+        <input type="hidden" id="employee-id" />
+        <div class="three-col responsive-grid">
+          <div class="card inner-card photo-card">
+            <img id="employee-photo-preview" src="" alt="Prévia da foto" class="photo-preview hidden" />
+            <div id="photo-placeholder" class="photo-placeholder">Sem foto</div>
+            <input id="employee-photo-file" type="file" accept="image/*" class="hidden" />
+            <input id="employee-photo-camera" type="file" accept="image/*" capture="environment" class="hidden" />
+            <div class="header-actions wrap">
+              <button type="button" id="btn-select-photo" class="secondary">Galeria</button>
+              <button type="button" id="btn-camera-photo" class="secondary">Câmera</button>
+              <button type="button" id="btn-remove-photo" class="danger-outline">Remover</button>
+            </div>
+          </div>
+
+          <div class="card inner-card span-2">
+            <div class="tabs">
+              <button type="button" class="tab-btn active" data-tab="personal">Pessoal</button>
+              <button type="button" class="tab-btn" data-tab="professional">Profissional</button>
+              <button type="button" class="tab-btn" data-tab="documents">Documentos</button>
+            </div>
+
+            <div id="tab-personal" class="tab-panel active">
+              <div class="form-grid two-col">
+                <label>Nome completo<input id="full-name" type="text" required /></label>
+                <label>Status
+                  <select id="status">
+                    <option value="ativo">Ativo</option>
+                    <option value="afastado">Afastado</option>
+                    <option value="desligado">Desligado</option>
+                  </select>
+                </label>
+                <label>CPF<input id="cpf" type="text" /></label>
+                <label>RG<input id="rg" type="text" /></label>
+                <label>Data de nascimento<input id="birth-date" type="date" /></label>
+                <label>Telefone<input id="phone" type="text" /></label>
+                <label>Celular<input id="mobile" type="text" /></label>
+                <label>E-mail<input id="email" type="email" /></label>
+                <label>CEP<input id="cep" type="text" /></label>
+                <label>Rua<input id="address-street" type="text" /></label>
+                <label>Número<input id="address-number" type="text" /></label>
+                <label>Complemento<input id="address-complement" type="text" /></label>
+                <label>Bairro<input id="address-neighborhood" type="text" /></label>
+                <label>Cidade<input id="address-city" type="text" /></label>
+                <label>Estado<input id="address-state" type="text" /></label>
+                <label>Contato de emergência<input id="emergency-name" type="text" /></label>
+                <label>Telefone de emergência<input id="emergency-phone" type="text" /></label>
+              </div>
+              <div class="header-actions mt-12">
+                <button type="button" id="btn-search-cep" class="secondary">Buscar CEP</button>
+              </div>
+            </div>
+
+            <div id="tab-professional" class="tab-panel hidden">
+              <div class="form-grid two-col">
+                <label>Cargo<input id="role" type="text" /></label>
+                <label>Setor<input id="sector" type="text" /></label>
+                <label>Data de admissão<input id="hire-date" type="date" /></label>
+                <label>Tipo de contrato<input id="contract-type" type="text" placeholder="CLT, experiência, PJ..." /></label>
+                <label>Salário<input id="salary" type="number" step="0.01" min="0" /></label>
+                <label>Dias de experiência<input id="trial-days" type="number" step="1" min="0" value="90" /></label>
+                <label class="span-2">Observações<textarea id="notes" rows="5"></textarea></label>
+              </div>
+            </div>
+
+            <div id="tab-documents" class="tab-panel hidden">
+              <div class="form-grid one-col">
+                <label>Upload de anexo</label>
+                <input id="employee-document-file" type="file" />
+                <label>Tipo do documento</label>
+                <input id="employee-document-type" type="text" placeholder="RG, CPF, contrato, certificado..." />
+                <button type="button" id="btn-upload-document" class="secondary">Enviar documento</button>
+                <div id="employee-documents-list" class="list-stack"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="secondary" data-close-modal="true">Cancelar</button>
+          <button type="submit" class="primary">Salvar funcionário</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
