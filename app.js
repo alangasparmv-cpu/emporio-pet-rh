@@ -84,25 +84,26 @@ function initSignaturePad(){
     state.signatureDataUrl = canvas.toDataURL('image/png');
   }
 
-  canvas.addEventListener('mousedown', start);
-  canvas.addEventListener('mousemove', move);
-  canvas.addEventListener('mouseup', end);
-  canvas.addEventListener('mouseleave', end);
+  canvas.addEventListener('pointerdown', function(e){
+    canvas.setPointerCapture(e.pointerId);
+    start(e);
+  });
 
- canvas.addEventListener('touchstart', function(e){
-  e.preventDefault();
-  start(e);
-}, { passive:false });
+  canvas.addEventListener('pointermove', function(e){
+    move(e);
+  });
 
-canvas.addEventListener('touchmove', function(e){
-  e.preventDefault();
-  move(e);
-}, { passive:false });
+  canvas.addEventListener('pointerup', function(e){
+    end(e);
+  });
 
-canvas.addEventListener('touchend', function(e){
-  e.preventDefault();
-  end(e);
-}, { passive:false });
+  canvas.addEventListener('pointercancel', function(e){
+    end(e);
+  });
+
+  canvas.addEventListener('pointerleave', function(e){
+    end(e);
+  });
 
   $('btn-clear-signature')?.addEventListener('click', () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
