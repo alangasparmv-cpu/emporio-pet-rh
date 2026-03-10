@@ -22,7 +22,21 @@ const initials=(n='')=>n.split(' ').filter(Boolean).slice(0,2).map(p=>p[0]?.toUp
 const employeeAddress=(e)=>[e.address_street,e.address_number,e.address_complement,e.address_neighborhood,e.address_city,e.address_state].filter(Boolean).join(', ');
 function initSupabase(){ const s=getJSON(STORAGE_KEYS.settings,{}); state.supabase=(s.url&&s.key&&window.supabase)?window.supabase.createClient(s.url,s.key):null; }
 async function logAction(action,details){ const entry={action,details,created_at:new Date().toISOString(),user_email:getJSON(STORAGE_KEYS.session,{}).email||'administrador'}; const hist=getJSON(STORAGE_KEYS.history,[]); hist.unshift(entry); setJSON(STORAGE_KEYS.history,hist.slice(0,200)); if(state.supabase){ try{ await state.supabase.from('audit_logs').insert(entry); }catch(e){} } renderHistory(); }
-function setupLoginScreen(){ const admin=getJSON(STORAGE_KEYS.admin,null); $('setup-box').classList.toggle('hidden',!!admin); $('btn-create-admin').classList.toggle('hidden',!!admin); $('btn-login').classList.toggle('hidden',!admin); $('login-message').textContent=admin?'':'Defina o primeiro acesso do administrador.'; }
+function setupLoginScreen(){
+  const admin = getJSON(STORAGE_KEYS.admin,null);
+
+  if(!admin){
+    $('setup-box').classList.remove('hidden');
+    $('btn-create-admin').classList.remove('hidden');
+    $('btn-login').classList.add('hidden');
+    $('login-message').textContent = 'Defina o primeiro acesso do administrador.';
+  }else{
+    $('setup-box').classList.add('hidden');
+    $('btn-create-admin').classList.add('hidden');
+    $('btn-login').classList.remove('hidden');
+    $('login-message').textContent = '';
+  }
+}
 function showApp(){ $('login-screen').classList.add('hidden'); $('main-app').classList.remove('hidden'); $('logged-user-label').textContent=getJSON(STORAGE_KEYS.session,{}).email||'Administrador'; initSupabase(); loadSettingsIntoUI(); loadTemplatesIntoUI(); loadEmployees(); renderHistory(); }
 function showLogin(){ $('main-app').classList.add('hidden'); $('login-screen').classList.remove('hidden'); setupLoginScreen(); }
 async function handleCreateAdmin(){ const email=$('login-email').value.trim().toLowerCase(); const password=$('login-password').value; if(!email||!password||password.length<4){ $('login-message').textContent='Informe e-mail e uma senha com pelo menos 4 caracteres.'; return; } setJSON(STORAGE_KEYS.admin,{email,passwordHash:hashString(password)}); setJSON(STORAGE_KEYS.session,{email,loggedAt:new Date().toISOString()}); await logAction('setup_admin','Administrador inicial configurado'); showApp(); }
