@@ -67,6 +67,89 @@ window.loadTemplateToForm=(i)=>{ const t=getJSON(STORAGE_KEYS.templates,DEFAULT_
 function saveTemplateFromForm(){ const name=$('template-name').value.trim(), content=$('template-content').value.trim(); if(!name||!content) return alert('Preencha nome e conteúdo do modelo.'); const t=getJSON(STORAGE_KEYS.templates,DEFAULT_TEMPLATES), i=t.findIndex(x=>x.name.toLowerCase()===name.toLowerCase()), item={name,content}; if(i>=0) t[i]=item; else t.push(item); setJSON(STORAGE_KEYS.templates,t); loadTemplatesIntoUI(); $('template-name').value=''; $('template-content').value=''; }
 function renderDocumentPreview(){ const emp=state.employees.find(e=>e.id===$('doc-employee-select').value), t=getJSON(STORAGE_KEYS.templates,DEFAULT_TEMPLATES)[$('doc-template-select').value]||DEFAULT_TEMPLATES[0]; if(!emp||!t){ $('doc-preview').textContent='Selecione um funcionário e um modelo.'; return; } let text=t.content; const vars={ full_name:emp.full_name||'', cpf:emp.cpf||'', rg:emp.rg||'', role:emp.role||'', sector:emp.sector||'', address:employeeAddress(emp), mobile:emp.mobile||'', hire_date:formatDate(emp.hire_date), trial_days:emp.trial_days||90, today:new Date().toLocaleDateString('pt-BR')}; Object.entries(vars).forEach(([k,v])=> text=text.replaceAll(`{{${k}}}`,v??'')); $('doc-preview').textContent=text; }
 function printPreview(){ const html=$('doc-preview').textContent; const w=window.open('','_blank'); w.document.write(`<pre style="font-family:Arial,sans-serif;white-space:pre-wrap;padding:24px;line-height:1.5">${html.replaceAll('<','&lt;')}</pre>`); w.document.close(); w.print(); }
+function generateEmployeePdf(){
+  const employeeId = $('employee-id')?.value;
+  if(!employeeId) return alert('Salve o funcionário antes de gerar a ficha em PDF.');
+
+  const emp = state.employees.find(e => e.id === employeeId);
+  if(!emp) return alert('Funcionário não encontrado.');
+
+  const w = window.open('', '_blank');
+  const photoHtml = emp.photo_url
+    ? `<img src="${emp.photo_url}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #ccc;">`
+    : `<div style="width:120px;height:120px;border:1px solid #ccc;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#666;">Sem foto</div>`;
+
+  const docsHtml = (state.currentDocuments && state.currentDocuments.length)
+    ? state.currentDocuments.map(doc => `
+        <tr>
+          <td style="padding:8px;border:1px solid #ccc;">${doc.document_type || 'Documento'}</td>
+          <td style="padding:8px;border:1px solid #ccc;">
+            <a href="${doc.file_url}" target="_blank">Abrir arquivo</a>
+          </td>
+        </tr>
+      `).join('')
+    : `<tr><td colspan="2" style="padding:8px;border:1px solid #ccc;">Nenhum documento anexado.</td></tr>`;
+
+  w.document.write(`
+    <html>
+    <head>
+      <title>Ficha do Funcionário</title>
+    </head>
+    <body style="font-family:Arial,sans-serif;padding:24px;color:#222;">
+      <h1 style="margin-bottom:8px;">Ficha do Funcionário</h1>
+      <p style="margin-top:0;color:#666;">Empório Pet RH</p>
+
+      <div style="display:flex;gap:24px;align-items:flex-start;margin-bottom:24px;">
+        <div>${photoHtml}</div>
+        <div>
+          <p><strong>Nome:</strong> ${emp.full_name || '-'}</p>
+          <p><strong>Status:</strong> ${emp.status || '-'}</p>
+          <p><strong>CPF:</strong> ${emp.cpf || '-'}</p>
+          <p><strong>RG:</strong> ${emp.rg || '-'}</p>
+          <p><strong>Data de nascimento:</strong> ${formatDate(emp.birth_date) || '-'}</p>
+          <p><strong>Telefone:</strong> ${emp.phone || '-'}</p>
+          <p><strong>Celular:</strong> ${emp.mobile || '-'}</p>
+          <p><strong>E-mail:</strong> ${emp.email || '-'}</p>
+        </div>
+      </div>
+
+      <h2>Endereço</h2>
+      <p>${employeeAddress(emp) || '-'}</p>
+      <p><strong>CEP:</strong> ${emp.cep || '-'}</p>
+
+      <h2>Dados profissionais</h2>
+      <p><strong>Cargo:</strong> ${emp.role || '-'}</p>
+      <p><strong>Setor:</strong> ${emp.sector || '-'}</p>
+      <p><strong>Admissão:</strong> ${formatDate(emp.hire_date) || '-'}</p>
+      <p><strong>Contrato:</strong> ${emp.contract_type || '-'}</p>
+      <p><strong>Salário:</strong> ${emp.salary ? Number(emp.salary).toLocaleString('pt-BR', {style:'currency', currency:'BRL'}) : '-'}</p>
+      <p><strong>Período de experiência:</strong> ${emp.trial_days || '-'} dias</p>
+      <p><strong>Observações:</strong> ${emp.notes || '-'}</p>
+
+      <h2>Documentos anexados</h2>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="padding:8px;border:1px solid #ccc;text-align:left;">Tipo</th>
+            <th style="padding:8px;border:1px solid #ccc;text-align:left;">Arquivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${docsHtml}
+        </tbody>
+      </table>
+
+      <script>
+        window.onload = function(){
+          window.print();
+        };
+      </script>
+    </body>
+    </html>
+  `);
+
+  w.document.close();
+}
 const loadDefaultTemplates=()=>{ setJSON(STORAGE_KEYS.templates,DEFAULT_TEMPLATES); loadTemplatesIntoUI(); };
 function exportCsv(rows,filename){ const csv=rows.map(r=>r.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(';')).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}), url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url); }
 const exportEmployeesCsv=(detailed=false)=>exportCsv([[...(detailed?['Nome','Status','CPF','RG','Nascimento','Telefone','Celular','Email','Cargo','Setor','Admissão','Contrato','Salário','CEP','Endereço','Emergência','Tel. Emergência','Observações']:['Nome','Status','Cargo','Setor','CPF','Celular'])], ...state.employees.map(e=> detailed?[e.full_name,e.status,e.cpf,e.rg,formatDate(e.birth_date),e.phone,e.mobile,e.email,e.role,e.sector,formatDate(e.hire_date),e.contract_type,e.salary,e.cep,employeeAddress(e),e.emergency_name,e.emergency_phone,e.notes]:[e.full_name,e.status,e.role,e.sector,e.cpf,e.mobile])], detailed?'funcionarios-completo.csv':'funcionarios.csv');
