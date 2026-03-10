@@ -1,48 +1,60 @@
 const SUPABASE_URL = "https://xqikfrufphwaqmfuexvx.supabase.co";
 const SUPABASE_KEY = "sb_publishable__-5ZX8k6kNTwQH5dvZxvMA_xVCX7-Up";
 
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 window.login = async function () {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const msg = document.getElementById("msg");
 
-  msg.innerText = "Entrando...";
+const email = document.getElementById("email").value;
+const password = document.getElementById("password").value;
 
-  const { error } = await sb.auth.signInWithPassword({
-    email,
-    password
-  });
+document.getElementById("msg").innerText = "Entrando...";
 
-  if (error) {
-    msg.innerText = error.message;
-    return;
-  }
+const { data, error } = await supabase.auth.signInWithPassword({
+email: email,
+password: password
+});
 
-  msg.innerText = "Login realizado com sucesso.";
-  document.getElementById("panel").classList.remove("hidden");
+if (error) {
+
+document.getElementById("msg").innerText =
+"Erro: " + error.message;
+
+return;
+
+}
+
+document.getElementById("msg").innerText =
+"Login realizado com sucesso";
+
+document.getElementById("panel").classList.remove("hidden");
+
 };
 
 window.logout = async function () {
-  await sb.auth.signOut();
-  document.getElementById("panel").classList.add("hidden");
-  document.getElementById("msg").innerText = "Sessão encerrada.";
+
+await supabase.auth.signOut();
+
+document.getElementById("panel").classList.add("hidden");
+
 };
 
 window.loadEmployees = async function () {
-  const result = document.getElementById("result");
-  result.innerText = "Carregando...";
 
-  const { data, error } = await sb
-    .from("funcionarios")
-    .select("*")
-    .order("created_at", { ascending: false });
+const { data, error } = await supabase
+.from("employees")
+.select("*");
 
-  if (error) {
-    result.innerText = error.message;
-    return;
-  }
+if (error) {
 
-  result.innerText = JSON.stringify(data, null, 2);
+document.getElementById("result").innerText =
+error.message;
+
+return;
+
+}
+
+document.getElementById("result").innerText =
+JSON.stringify(data,null,2);
+
 };
