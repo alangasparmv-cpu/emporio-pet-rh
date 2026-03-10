@@ -88,6 +88,55 @@ const maskCPF = (v) => {
   return v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 };
 
+function validarCPF(cpf) {
+  cpf = String(cpf || '').replace(/\D/g, '');
+
+  if (cpf.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(cpf)) return false;
+
+  let soma = 0;
+  for (let i = 0; i < 9; i++) {
+    soma += Number(cpf.charAt(i)) * (10 - i);
+  }
+
+  let dig1 = 11 - (soma % 11);
+  if (dig1 >= 10) dig1 = 0;
+  if (dig1 !== Number(cpf.charAt(9))) return false;
+
+  soma = 0;
+  for (let i = 0; i < 10; i++) {
+    soma += Number(cpf.charAt(i)) * (11 - i);
+  }
+
+  let dig2 = 11 - (soma % 11);
+  if (dig2 >= 10) dig2 = 0;
+  if (dig2 !== Number(cpf.charAt(10))) return false;
+
+  return true;
+}
+
+function validarCampoCPF() {
+  const input = $('cpf');
+  if (!input) return true;
+
+  const valor = input.value.trim();
+  if (!valor) {
+    input.setCustomValidity('');
+    input.style.borderColor = '';
+    return true;
+  }
+
+  if (!validarCPF(valor)) {
+    input.setCustomValidity('CPF inválido');
+    input.style.borderColor = '#dc2626';
+    return false;
+  }
+
+  input.setCustomValidity('');
+  input.style.borderColor = '';
+  return true;
+}
+
 const maskRG = (v) => {
   v = v.replace(/\D/g, '').slice(0, 9);
   v = v.replace(/(\d{2})(\d)/, '$1.$2');
@@ -634,13 +683,21 @@ async function saveEmployee(event) {
 
   if (!state.supabase) return alert('Configure a conexão com o Supabase antes de salvar.');
 
+  const cpfInformado = $('cpf')?.value.trim() || '';
+  if (!validarCPF(cpfInformado)) {
+    alert('CPF inválido. Verifique o número digitado.');
+    $('cpf')?.focus();
+    validarCampoCPF();
+    return;
+  }
+
   const id = $('employee-id')?.value || crypto.randomUUID();
 
   const payload = {
     id,
     full_name: $('full-name')?.value.trim() || '',
     status: $('status')?.value || 'ativo',
-    cpf: $('cpf')?.value.trim() || '',
+    cpf: cpfInformado,
     rg: $('rg')?.value.trim() || '',
     birth_date: $('birth-date')?.value || null,
     phone: $('phone')?.value.trim() || '',
@@ -769,7 +826,15 @@ async function searchCEP() {
 }
 
 function bindMasks() {
-  if ($('cpf')) $('cpf').addEventListener('input', e => e.target.value = maskCPF(e.target.value));
+  if ($('cpf')) {
+    $('cpf').addEventListener('input', e => {
+      e.target.value = maskCPF(e.target.value);
+      e.target.setCustomValidity('');
+      e.target.style.borderColor = '';
+    });
+    $('cpf').addEventListener('blur', validarCampoCPF);
+  }
+
   if ($('rg')) $('rg').addEventListener('input', e => e.target.value = maskRG(e.target.value));
   if ($('phone')) $('phone').addEventListener('input', e => e.target.value = maskPhone(e.target.value));
   if ($('mobile')) $('mobile').addEventListener('input', e => e.target.value = maskPhone(e.target.value));
