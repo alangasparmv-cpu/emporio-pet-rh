@@ -121,6 +121,23 @@ async function saveEmployee(event){ event.preventDefault(); if(!state.supabase) 
   try{ if(state.currentPhotoFile){ const s=getJSON(STORAGE_KEYS.settings,{}); payload.photo_url=await uploadFileToBucket(state.currentPhotoFile,s.photoBucket||'employee-photos',`photo-${id}`);} else if(state.editingEmployee?.photo_url){ payload.photo_url=state.editingEmployee.photo_url; } if(!state.editingEmployee) payload.created_at=new Date().toISOString(); const {error}=await state.supabase.from('employees').upsert(payload); if(error) throw error; await logAction(state.editingEmployee?'edit_employee':'create_employee',`${payload.full_name} (${payload.status})`); closeEmployeeModal(); await loadEmployees(); }catch(e){ alert(`Erro ao salvar funcionário: ${e.message}`); } }
 async function setEmployeeStatus(id,status){ const emp=state.employees.find(e=>e.id===id); if(!emp||!state.supabase) return; try{ const {error}=await state.supabase.from('employees').update({status,updated_at:new Date().toISOString()}).eq('id',id); if(error) throw error; await logAction('status_employee',`${emp.full_name} alterado para ${status}`); await loadEmployees(); }catch(e){ alert(`Erro ao alterar status: ${e.message}`); } }
 async function deleteEmployee(id){ const emp=state.employees.find(e=>e.id===id); if(!emp||!state.supabase) return; if(!confirm(`Excluir definitivamente ${emp.full_name}? Essa ação não pode ser desfeita.`)) return; try{ await state.supabase.from('employee_documents').delete().eq('employee_id',id); const {error}=await state.supabase.from('employees').delete().eq('id',id); if(error) throw error; await logAction('delete_employee',`${emp.full_name} foi excluído definitivamente`); await loadEmployees(); }catch(e){ alert(`Erro ao excluir: ${e.message}`); } }
+async function deleteEmployeeDocument(id){
+  if(!confirm('Excluir este documento?')) return;
+
+  try{
+    const { error } = await state.supabase
+      .from('employee_documents')
+      .delete()
+      .eq('id', id);
+
+    if(error) throw error;
+
+    await loadEmployeeDocuments(state.editingEmployee.id);
+  }
+  catch(e){
+    alert('Erro ao excluir documento: ' + e.message);
+  }
+}
 window.editEmployee=(id)=>{ const emp=state.employees.find(e=>e.id===id); if(emp) openEmployeeModal(emp); }; window.setEmployeeStatus=setEmployeeStatus; window.deleteEmployee=deleteEmployee;
 async function searchCEP(){ const cep=$('cep').value.replace(/\D/g,''); if(cep.length!==8) return alert('Digite um CEP válido.'); try{ const r=await fetch(`https://viacep.com.br/ws/${cep}/json/`), d=await r.json(); if(d.erro) throw new Error('CEP não encontrado.'); $('address-street').value=d.logradouro||''; $('address-neighborhood').value=d.bairro||''; $('address-city').value=d.localidade||''; $('address-state').value=d.uf||''; }catch(e){ alert(e.message||'Não foi possível consultar o CEP.'); } }
 function bindMasks(){
