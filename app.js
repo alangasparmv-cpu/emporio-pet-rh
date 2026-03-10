@@ -42,6 +42,64 @@ function renderHistory(){ const local=getJSON(STORAGE_KEYS.history,[]); $('histo
 function populateEmployeeSelects(){ $('doc-employee-select').innerHTML=['<option value="">Selecione</option>'].concat(state.employees.map(e=>`<option value="${e.id}">${e.full_name}</option>`)).join(''); }
 function activateTab(tab){ $$('.tab-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===tab)); ['personal','professional','documents'].forEach(name=>{ $(`tab-${name}`).classList.toggle('hidden',name!==tab); $(`tab-${name}`).classList.toggle('active',name===tab); }); }
 function updatePhotoPreview(url){ $('employee-photo-preview').src=url||''; $('employee-photo-preview').classList.toggle('hidden',!url); $('photo-placeholder').classList.toggle('hidden',!!url); }
+function initSignaturePad(){
+  const canvas = $('signature-canvas');
+  if(!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#111';
+
+  let drawing = false;
+
+  function getPos(e){
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : e;
+    return {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top
+    };
+  }
+
+  function start(e){
+    drawing = true;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    e.preventDefault();
+  }
+
+  function move(e){
+    if(!drawing) return;
+    const pos = getPos(e);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    state.signatureDataUrl = canvas.toDataURL('image/png');
+    e.preventDefault();
+  }
+
+  function end(){
+    drawing = false;
+    state.signatureDataUrl = canvas.toDataURL('image/png');
+  }
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  canvas.addEventListener('mouseup', end);
+  canvas.addEventListener('mouseleave', end);
+
+  canvas.addEventListener('touchstart', start, { passive:false });
+  canvas.addEventListener('touchmove', move, { passive:false });
+  canvas.addEventListener('touchend', end);
+
+  $('btn-clear-signature')?.addEventListener('click', () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    state.signatureDataUrl = '';
+  });
+
+  state.signaturePad = { canvas, ctx };
+}
 async function loadEmployeeDocuments(employeeId){ if(!state.supabase||!employeeId) return; const {data,error}=await state.supabase.from('employee_documents').select('*').eq('employee_id',employeeId).order('created_at',{ascending:false}); if(!error){ state.currentDocuments=data||[]; $('employee-documents-list').innerHTML=state.currentDocuments.length?state.currentDocuments.map(doc=>`<div class="list-item"><strong>${doc.document_type||'Documento'}</strong><br><a href="${doc.file_url}" target="_blank">Abrir arquivo</a></div>`).join(''):'<div class="list-item">Nenhum documento enviado.</div>'; } }
 function openEmployeeModal(employee=null){ state.editingEmployee=employee; state.currentPhotoFile=null; $('employee-modal-title').textContent=employee?'Editar funcionário':'Novo funcionário'; $('employee-form').reset(); $('employee-id').value=employee?.id||''; $('employee-documents-list').innerHTML=''; if(employee){ [['full-name','full_name'],['status','status'],['cpf','cpf'],['rg','rg'],['birth-date','birth_date'],['phone','phone'],['mobile','mobile'],['email','email'],['cep','cep'],['address-street','address_street'],['address-number','address_number'],['address-complement','address_complement'],['address-neighborhood','address_neighborhood'],['address-city','address_city'],['address-state','address_state'],['emergency-name','emergency_name'],['emergency-phone','emergency_phone'],['role','role'],['sector','sector'],['hire-date','hire_date'],['contract-type','contract_type'],['salary','salary'],['trial-days','trial_days'],['notes','notes']].forEach(([id,key])=>$(id).value=employee[key]||''); updatePhotoPreview(employee.photo_url||''); loadEmployeeDocuments(employee.id); } else { $('status').value='ativo'; $('trial-days').value=90; updatePhotoPreview(''); } activateTab('personal'); $('employee-modal').classList.remove('hidden'); }
 function closeEmployeeModal(){ $('employee-modal').classList.add('hidden'); }
