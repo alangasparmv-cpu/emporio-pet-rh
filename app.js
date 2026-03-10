@@ -89,9 +89,20 @@ function initSignaturePad(){
   canvas.addEventListener('mouseup', end);
   canvas.addEventListener('mouseleave', end);
 
-  canvas.addEventListener('touchstart', start, { passive:false });
-  canvas.addEventListener('touchmove', move, { passive:false });
-  canvas.addEventListener('touchend', end);
+ canvas.addEventListener('touchstart', function(e){
+  e.preventDefault();
+  start(e);
+}, { passive:false });
+
+canvas.addEventListener('touchmove', function(e){
+  e.preventDefault();
+  move(e);
+}, { passive:false });
+
+canvas.addEventListener('touchend', function(e){
+  e.preventDefault();
+  end(e);
+}, { passive:false });
 
   $('btn-clear-signature')?.addEventListener('click', () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
