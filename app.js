@@ -144,23 +144,18 @@ async function logAction(action, details) {
 function setupLoginScreen() {
   const admin = getJSON(STORAGE_KEYS.admin, null);
 
-  if (!admin) {
-    $('setup-box').classList.remove('hidden');
-    $('btn-create-admin').classList.remove('hidden');
-    $('btn-login').classList.add('hidden');
-    $('login-message').textContent = 'Defina o primeiro acesso do administrador.';
-  } else {
-    $('setup-box').classList.add('hidden');
-    $('btn-create-admin').classList.add('hidden');
-    $('btn-login').classList.remove('hidden');
-    $('login-message').textContent = '';
+  if ($('setup-box')) $('setup-box').classList.toggle('hidden', !!admin);
+  if ($('btn-create-admin')) $('btn-create-admin').classList.toggle('hidden', !!admin);
+  if ($('btn-login')) $('btn-login').classList.toggle('hidden', !admin);
+  if ($('login-message')) {
+    $('login-message').textContent = admin ? '' : 'Defina o primeiro acesso do administrador.';
   }
 }
 
 function showApp() {
-  $('login-screen').classList.add('hidden');
-  $('main-app').classList.remove('hidden');
-  $('logged-user-label').textContent = getJSON(STORAGE_KEYS.session, {}).email || 'Administrador';
+  if ($('login-screen')) $('login-screen').classList.add('hidden');
+  if ($('main-app')) $('main-app').classList.remove('hidden');
+  if ($('logged-user-label')) $('logged-user-label').textContent = getJSON(STORAGE_KEYS.session, {}).email || 'Administrador';
   initSupabase();
   loadSettingsIntoUI();
   loadTemplatesIntoUI();
@@ -169,36 +164,59 @@ function showApp() {
 }
 
 function showLogin() {
-  $('main-app').classList.add('hidden');
-  $('login-screen').classList.remove('hidden');
+  if ($('main-app')) $('main-app').classList.add('hidden');
+  if ($('login-screen')) $('login-screen').classList.remove('hidden');
   setupLoginScreen();
 }
 
 async function handleCreateAdmin() {
-  const email = $('login-email').value.trim().toLowerCase();
-  const password = $('login-password').value;
+  const emailField = $('login-email');
+  const passwordField = $('login-password');
+  const msg = $('login-message');
+
+  if (!emailField || !passwordField || !msg) {
+    alert('Campos de login não encontrados no HTML.');
+    return;
+  }
+
+  const email = emailField.value.trim().toLowerCase();
+  const password = passwordField.value;
 
   if (!email || !password || password.length < 4) {
-    $('login-message').textContent = 'Informe e-mail e uma senha com pelo menos 4 caracteres.';
+    msg.textContent = 'Informe e-mail e uma senha com pelo menos 4 caracteres.';
     return;
   }
 
   setJSON(STORAGE_KEYS.admin, { email, passwordHash: hashString(password) });
   setJSON(STORAGE_KEYS.session, { email, loggedAt: new Date().toISOString() });
-  await logAction('setup_admin', 'Administrador inicial configurado');
+
+  try {
+    await logAction('setup_admin', 'Administrador inicial configurado');
+  } catch (e) {}
+
+  msg.textContent = '';
   showApp();
 }
 
 function handleLogin() {
   const admin = getJSON(STORAGE_KEYS.admin, null);
-  const email = $('login-email').value.trim().toLowerCase();
-  const password = $('login-password').value;
+  const emailField = $('login-email');
+  const passwordField = $('login-password');
+  const msg = $('login-message');
+
+  if (!emailField || !passwordField || !msg) {
+    alert('Campos de login não encontrados no HTML.');
+    return;
+  }
+
+  const email = emailField.value.trim().toLowerCase();
+  const password = passwordField.value;
 
   if (admin && email === admin.email && hashString(password) === admin.passwordHash) {
     setJSON(STORAGE_KEYS.session, { email, loggedAt: new Date().toISOString() });
     showApp();
   } else {
-    $('login-message').textContent = 'E-mail ou senha inválidos.';
+    msg.textContent = 'E-mail ou senha inválidos.';
   }
 }
 
@@ -211,32 +229,32 @@ function logout() {
 function switchView(view) {
   $$('.view').forEach(v => v.classList.add('hidden'));
   $$('.nav-btn').forEach(b => b.classList.remove('active'));
-  $(`view-${view}`).classList.remove('hidden');
+  if ($(`view-${view}`)) $(`view-${view}`).classList.remove('hidden');
   document.querySelector(`.nav-btn[data-view="${view}"]`)?.classList.add('active');
 }
 
 function loadSettingsIntoUI() {
   const s = getJSON(STORAGE_KEYS.settings, {});
-  $('supabase-url').value = s.url || '';
-  $('supabase-key').value = s.key || '';
-  $('bucket-photos').value = s.photoBucket || 'employee-photos';
-  $('bucket-docs').value = s.docBucket || 'employee-documents';
+  if ($('supabase-url')) $('supabase-url').value = s.url || '';
+  if ($('supabase-key')) $('supabase-key').value = s.key || '';
+  if ($('bucket-photos')) $('bucket-photos').value = s.photoBucket || 'employee-photos';
+  if ($('bucket-docs')) $('bucket-docs').value = s.docBucket || 'employee-documents';
 }
 
 function updateSettingsLockUI() {
-  $('settings-lock').classList.toggle('hidden', state.settingsUnlocked);
-  $('settings-panel').classList.toggle('hidden', !state.settingsUnlocked);
+  if ($('settings-lock')) $('settings-lock').classList.toggle('hidden', state.settingsUnlocked);
+  if ($('settings-panel')) $('settings-panel').classList.toggle('hidden', !state.settingsUnlocked);
 }
 
 function unlockSettings() {
   const admin = getJSON(STORAGE_KEYS.admin, null);
-  const pass = $('settings-password').value;
+  const pass = $('settings-password')?.value || '';
 
   if (admin && hashString(pass) === admin.passwordHash) {
     state.settingsUnlocked = true;
-    $('settings-message').textContent = 'Configurações desbloqueadas.';
+    if ($('settings-message')) $('settings-message').textContent = 'Configurações desbloqueadas.';
   } else {
-    $('settings-message').textContent = 'Senha incorreta.';
+    if ($('settings-message')) $('settings-message').textContent = 'Senha incorreta.';
   }
 
   updateSettingsLockUI();
@@ -244,30 +262,30 @@ function unlockSettings() {
 
 function saveConnectionSettings() {
   setJSON(STORAGE_KEYS.settings, {
-    url: $('supabase-url').value.trim(),
-    key: $('supabase-key').value.trim(),
-    photoBucket: $('bucket-photos').value.trim() || 'employee-photos',
-    docBucket: $('bucket-docs').value.trim() || 'employee-documents'
+    url: $('supabase-url')?.value.trim() || '',
+    key: $('supabase-key')?.value.trim() || '',
+    photoBucket: $('bucket-photos')?.value.trim() || 'employee-photos',
+    docBucket: $('bucket-docs')?.value.trim() || 'employee-documents'
   });
 
   initSupabase();
-  $('connection-result').textContent = 'Configurações salvas neste navegador.';
+  if ($('connection-result')) $('connection-result').textContent = 'Configurações salvas neste navegador.';
 }
 
 async function testConnection() {
-  $('connection-result').textContent = 'Testando conexão...';
+  if ($('connection-result')) $('connection-result').textContent = 'Testando conexão...';
 
   if (!state.supabase) {
-    $('connection-result').textContent = 'Preencha URL e chave corretamente.';
+    if ($('connection-result')) $('connection-result').textContent = 'Preencha URL e chave corretamente.';
     return;
   }
 
   try {
     const { error } = await state.supabase.from('employees').select('id', { count: 'exact', head: true });
     if (error) throw error;
-    $('connection-result').textContent = 'Conexão realizada com sucesso.';
+    if ($('connection-result')) $('connection-result').textContent = 'Conexão realizada com sucesso.';
   } catch (e) {
-    $('connection-result').textContent = `Falha na conexão: ${e.message}`;
+    if ($('connection-result')) $('connection-result').textContent = `Falha na conexão: ${e.message}`;
   }
 }
 
@@ -293,8 +311,8 @@ async function loadEmployees() {
 }
 
 function applyFilters() {
-  const term = $('search-employee').value.trim().toLowerCase();
-  const status = $('filter-status').value;
+  const term = $('search-employee')?.value.trim().toLowerCase() || '';
+  const status = $('filter-status')?.value || '';
 
   return state.employees.filter(emp => {
     const hay = [emp.full_name, emp.role, emp.cpf, emp.phone, emp.mobile].filter(Boolean).join(' ').toLowerCase();
@@ -304,6 +322,8 @@ function applyFilters() {
 
 function renderEmployees() {
   const c = $('employee-list');
+  if (!c) return;
+
   const list = applyFilters();
 
   c.innerHTML = list.length
@@ -349,12 +369,12 @@ function renderDashboard() {
     return left >= 0 && left <= 7;
   })()).length;
 
-  $('stat-total').textContent = total;
-  $('stat-active').textContent = active;
-  $('stat-away').textContent = away;
-  $('stat-dismissed').textContent = dismissed;
-  $('stat-trial').textContent = trials;
-  $('stat-birthdays').textContent = birthdays;
+  if ($('stat-total')) $('stat-total').textContent = total;
+  if ($('stat-active')) $('stat-active').textContent = active;
+  if ($('stat-away')) $('stat-away').textContent = away;
+  if ($('stat-dismissed')) $('stat-dismissed').textContent = dismissed;
+  if ($('stat-trial')) $('stat-trial').textContent = trials;
+  if ($('stat-birthdays')) $('stat-birthdays').textContent = birthdays;
 
   const alerts = [];
 
@@ -369,13 +389,17 @@ function renderDashboard() {
     }
   });
 
-  $('alerts-list').innerHTML = alerts.length
-    ? alerts.map(a => `<div class="list-item">${a}</div>`).join('')
-    : '<div class="list-item">Nenhum alerta no momento.</div>';
+  if ($('alerts-list')) {
+    $('alerts-list').innerHTML = alerts.length
+      ? alerts.map(a => `<div class="list-item">${a}</div>`).join('')
+      : '<div class="list-item">Nenhum alerta no momento.</div>';
+  }
 }
 
 function renderHistory() {
   const local = getJSON(STORAGE_KEYS.history, []);
+  if (!$('history-list')) return;
+
   $('history-list').innerHTML = local.length
     ? local.slice(0, 10).map(h => `
       <div class="list-item">
@@ -388,6 +412,8 @@ function renderHistory() {
 }
 
 function populateEmployeeSelects() {
+  if (!$('doc-employee-select')) return;
+
   $('doc-employee-select').innerHTML = ['<option value="">Selecione</option>']
     .concat(state.employees.map(e => `<option value="${e.id}">${e.full_name}</option>`))
     .join('');
@@ -396,15 +422,15 @@ function populateEmployeeSelects() {
 function activateTab(tab) {
   $$('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
   ['personal', 'professional', 'documents'].forEach(name => {
-    $(`tab-${name}`).classList.toggle('hidden', name !== tab);
-    $(`tab-${name}`).classList.toggle('active', name === tab);
+    if ($(`tab-${name}`)) $(`tab-${name}`).classList.toggle('hidden', name !== tab);
+    if ($(`tab-${name}`)) $(`tab-${name}`).classList.toggle('active', name === tab);
   });
 }
 
 function updatePhotoPreview(url) {
-  $('employee-photo-preview').src = url || '';
-  $('employee-photo-preview').classList.toggle('hidden', !url);
-  $('photo-placeholder').classList.toggle('hidden', !!url);
+  if ($('employee-photo-preview')) $('employee-photo-preview').src = url || '';
+  if ($('employee-photo-preview')) $('employee-photo-preview').classList.toggle('hidden', !url);
+  if ($('photo-placeholder')) $('photo-placeholder').classList.toggle('hidden', !!url);
 }
 
 function initSignaturePad() {
@@ -488,7 +514,7 @@ async function loadEmployeeDocuments(employeeId) {
     .eq('employee_id', employeeId)
     .order('created_at', { ascending: false });
 
-  if (!error) {
+  if (!error && $('employee-documents-list')) {
     state.currentDocuments = data || [];
     $('employee-documents-list').innerHTML = state.currentDocuments.length
       ? state.currentDocuments.map(doc => `
@@ -510,10 +536,10 @@ function openEmployeeModal(employee = null) {
   state.editingEmployee = employee;
   state.currentPhotoFile = null;
 
-  $('employee-modal-title').textContent = employee ? 'Editar funcionário' : 'Novo funcionário';
-  $('employee-form').reset();
-  $('employee-id').value = employee?.id || '';
-  $('employee-documents-list').innerHTML = '';
+  if ($('employee-modal-title')) $('employee-modal-title').textContent = employee ? 'Editar funcionário' : 'Novo funcionário';
+  if ($('employee-form')) $('employee-form').reset();
+  if ($('employee-id')) $('employee-id').value = employee?.id || '';
+  if ($('employee-documents-list')) $('employee-documents-list').innerHTML = '';
 
   if (employee) {
     [
@@ -541,22 +567,24 @@ function openEmployeeModal(employee = null) {
       ['salary', 'salary'],
       ['trial-days', 'trial_days'],
       ['notes', 'notes']
-    ].forEach(([id, key]) => $(id).value = employee[key] || '');
+    ].forEach(([id, key]) => {
+      if ($(id)) $(id).value = employee[key] || '';
+    });
 
     updatePhotoPreview(employee.photo_url || '');
     loadEmployeeDocuments(employee.id);
   } else {
-    $('status').value = 'ativo';
-    $('trial-days').value = 90;
+    if ($('status')) $('status').value = 'ativo';
+    if ($('trial-days')) $('trial-days').value = 90;
     updatePhotoPreview('');
   }
 
   activateTab('personal');
-  $('employee-modal').classList.remove('hidden');
+  if ($('employee-modal')) $('employee-modal').classList.remove('hidden');
 }
 
 function closeEmployeeModal() {
-  $('employee-modal').classList.add('hidden');
+  if ($('employee-modal')) $('employee-modal').classList.add('hidden');
 }
 
 async function uploadFileToBucket(file, bucket, prefix) {
@@ -572,9 +600,9 @@ async function uploadFileToBucket(file, bucket, prefix) {
 }
 
 async function uploadEmployeeDocument() {
-  const employeeId = $('employee-id').value;
-  const file = $('employee-document-file').files[0];
-  const type = $('employee-document-type').value.trim() || 'Documento';
+  const employeeId = $('employee-id')?.value || '';
+  const file = $('employee-document-file')?.files?.[0];
+  const type = $('employee-document-type')?.value.trim() || 'Documento';
 
   if (!employeeId) return alert('Salve o funcionário antes de enviar documentos.');
   if (!file) return alert('Selecione um arquivo.');
@@ -592,8 +620,8 @@ async function uploadEmployeeDocument() {
 
     if (error) throw error;
 
-    $('employee-document-file').value = '';
-    $('employee-document-type').value = '';
+    if ($('employee-document-file')) $('employee-document-file').value = '';
+    if ($('employee-document-type')) $('employee-document-type').value = '';
     await loadEmployeeDocuments(employeeId);
     await logAction('upload_document', `Documento enviado para ${state.editingEmployee?.full_name || employeeId}`);
   } catch (e) {
@@ -606,34 +634,34 @@ async function saveEmployee(event) {
 
   if (!state.supabase) return alert('Configure a conexão com o Supabase antes de salvar.');
 
-  const id = $('employee-id').value || crypto.randomUUID();
+  const id = $('employee-id')?.value || crypto.randomUUID();
 
   const payload = {
     id,
-    full_name: $('full-name').value.trim(),
-    status: $('status').value,
-    cpf: $('cpf').value.trim(),
-    rg: $('rg').value.trim(),
-    birth_date: $('birth-date').value || null,
-    phone: $('phone').value.trim(),
-    mobile: $('mobile').value.trim(),
-    email: $('email').value.trim(),
-    cep: $('cep').value.trim(),
-    address_street: $('address-street').value.trim(),
-    address_number: $('address-number').value.trim(),
-    address_complement: $('address-complement').value.trim(),
-    address_neighborhood: $('address-neighborhood').value.trim(),
-    address_city: $('address-city').value.trim(),
-    address_state: $('address-state').value.trim(),
-    emergency_name: $('emergency-name').value.trim(),
-    emergency_phone: $('emergency-phone').value.trim(),
-    role: $('role').value.trim(),
-    sector: $('sector').value.trim(),
-    hire_date: $('hire-date').value || null,
-    contract_type: $('contract-type').value.trim(),
-    salary: Number($('salary').value || 0),
-    trial_days: Number($('trial-days').value || 90),
-    notes: $('notes').value.trim(),
+    full_name: $('full-name')?.value.trim() || '',
+    status: $('status')?.value || 'ativo',
+    cpf: $('cpf')?.value.trim() || '',
+    rg: $('rg')?.value.trim() || '',
+    birth_date: $('birth-date')?.value || null,
+    phone: $('phone')?.value.trim() || '',
+    mobile: $('mobile')?.value.trim() || '',
+    email: $('email')?.value.trim() || '',
+    cep: $('cep')?.value.trim() || '',
+    address_street: $('address-street')?.value.trim() || '',
+    address_number: $('address-number')?.value.trim() || '',
+    address_complement: $('address-complement')?.value.trim() || '',
+    address_neighborhood: $('address-neighborhood')?.value.trim() || '',
+    address_city: $('address-city')?.value.trim() || '',
+    address_state: $('address-state')?.value.trim() || '',
+    emergency_name: $('emergency-name')?.value.trim() || '',
+    emergency_phone: $('emergency-phone')?.value.trim() || '',
+    role: $('role')?.value.trim() || '',
+    sector: $('sector')?.value.trim() || '',
+    hire_date: $('hire-date')?.value || null,
+    contract_type: $('contract-type')?.value.trim() || '',
+    salary: Number($('salary')?.value || 0),
+    trial_days: Number($('trial-days')?.value || 90),
+    notes: $('notes')?.value.trim() || '',
     updated_at: new Date().toISOString()
   };
 
@@ -722,7 +750,7 @@ window.setEmployeeStatus = setEmployeeStatus;
 window.deleteEmployee = deleteEmployee;
 
 async function searchCEP() {
-  const cep = $('cep').value.replace(/\D/g, '');
+  const cep = $('cep')?.value.replace(/\D/g, '') || '';
   if (cep.length !== 8) return alert('Digite um CEP válido.');
 
   try {
@@ -731,23 +759,23 @@ async function searchCEP() {
 
     if (d.erro) throw new Error('CEP não encontrado.');
 
-    $('address-street').value = d.logradouro || '';
-    $('address-neighborhood').value = d.bairro || '';
-    $('address-city').value = d.localidade || '';
-    $('address-state').value = d.uf || '';
+    if ($('address-street')) $('address-street').value = d.logradouro || '';
+    if ($('address-neighborhood')) $('address-neighborhood').value = d.bairro || '';
+    if ($('address-city')) $('address-city').value = d.localidade || '';
+    if ($('address-state')) $('address-state').value = d.uf || '';
   } catch (e) {
     alert(e.message || 'Não foi possível consultar o CEP.');
   }
 }
 
 function bindMasks() {
-  $('cpf').addEventListener('input', e => e.target.value = maskCPF(e.target.value));
-  $('rg').addEventListener('input', e => e.target.value = maskRG(e.target.value));
-  $('phone').addEventListener('input', e => e.target.value = maskPhone(e.target.value));
-  $('mobile').addEventListener('input', e => e.target.value = maskPhone(e.target.value));
-  $('emergency-phone').addEventListener('input', e => e.target.value = maskPhone(e.target.value));
-  $('cep').addEventListener('input', e => e.target.value = maskCEP(e.target.value));
-  $('cep').addEventListener('blur', searchCEP);
+  if ($('cpf')) $('cpf').addEventListener('input', e => e.target.value = maskCPF(e.target.value));
+  if ($('rg')) $('rg').addEventListener('input', e => e.target.value = maskRG(e.target.value));
+  if ($('phone')) $('phone').addEventListener('input', e => e.target.value = maskPhone(e.target.value));
+  if ($('mobile')) $('mobile').addEventListener('input', e => e.target.value = maskPhone(e.target.value));
+  if ($('emergency-phone')) $('emergency-phone').addEventListener('input', e => e.target.value = maskPhone(e.target.value));
+  if ($('cep')) $('cep').addEventListener('input', e => e.target.value = maskCEP(e.target.value));
+  if ($('cep')) $('cep').addEventListener('blur', searchCEP);
 }
 
 function loadTemplatesIntoUI() {
@@ -756,26 +784,31 @@ function loadTemplatesIntoUI() {
 
   if (!templates.length) setJSON(STORAGE_KEYS.templates, DEFAULT_TEMPLATES);
 
-  $('doc-template-select').innerHTML = use.map((t, i) => `<option value="${i}">${t.name}</option>`).join('');
-  $('templates-list').innerHTML = use.map((t, i) => `
-    <div class="list-item">
-      <strong>${t.name}</strong><br>
-      <button class="secondary mt-12" onclick="window.loadTemplateToForm(${i})">Editar modelo</button>
-    </div>
-  `).join('');
+  if ($('doc-template-select')) {
+    $('doc-template-select').innerHTML = use.map((t, i) => `<option value="${i}">${t.name}</option>`).join('');
+  }
+
+  if ($('templates-list')) {
+    $('templates-list').innerHTML = use.map((t, i) => `
+      <div class="list-item">
+        <strong>${t.name}</strong><br>
+        <button class="secondary mt-12" onclick="window.loadTemplateToForm(${i})">Editar modelo</button>
+      </div>
+    `).join('');
+  }
 }
 
 window.loadTemplateToForm = (i) => {
   const t = getJSON(STORAGE_KEYS.templates, DEFAULT_TEMPLATES)[i];
   if (t) {
-    $('template-name').value = t.name;
-    $('template-content').value = t.content;
+    if ($('template-name')) $('template-name').value = t.name;
+    if ($('template-content')) $('template-content').value = t.content;
   }
 };
 
 function saveTemplateFromForm() {
-  const name = $('template-name').value.trim();
-  const content = $('template-content').value.trim();
+  const name = $('template-name')?.value.trim() || '';
+  const content = $('template-content')?.value.trim() || '';
 
   if (!name || !content) return alert('Preencha nome e conteúdo do modelo.');
 
@@ -788,16 +821,18 @@ function saveTemplateFromForm() {
 
   setJSON(STORAGE_KEYS.templates, t);
   loadTemplatesIntoUI();
-  $('template-name').value = '';
-  $('template-content').value = '';
+  if ($('template-name')) $('template-name').value = '';
+  if ($('template-content')) $('template-content').value = '';
 }
 
 function renderDocumentPreview() {
-  const emp = state.employees.find(e => e.id === $('doc-employee-select').value);
-  const t = getJSON(STORAGE_KEYS.templates, DEFAULT_TEMPLATES)[$('doc-template-select').value] || DEFAULT_TEMPLATES[0];
+  const employeeId = $('doc-employee-select')?.value || '';
+  const templateIndex = $('doc-template-select')?.value || 0;
+  const emp = state.employees.find(e => e.id === employeeId);
+  const t = getJSON(STORAGE_KEYS.templates, DEFAULT_TEMPLATES)[templateIndex] || DEFAULT_TEMPLATES[0];
 
   if (!emp || !t) {
-    $('doc-preview').textContent = 'Selecione um funcionário e um modelo.';
+    if ($('doc-preview')) $('doc-preview').textContent = 'Selecione um funcionário e um modelo.';
     return;
   }
 
@@ -816,11 +851,11 @@ function renderDocumentPreview() {
   };
 
   Object.entries(vars).forEach(([k, v]) => text = text.replaceAll(`{{${k}}}`, v ?? ''));
-  $('doc-preview').textContent = text;
+  if ($('doc-preview')) $('doc-preview').textContent = text;
 }
 
 function printPreview() {
-  const html = $('doc-preview').textContent;
+  const html = $('doc-preview')?.textContent || '';
   const w = window.open('', '_blank');
   w.document.write(`<pre style="font-family:Arial,sans-serif;white-space:pre-wrap;padding:24px;line-height:1.5">${html.replaceAll('<', '&lt;')}</pre>`);
   w.document.close();
@@ -952,59 +987,69 @@ function registerPWA() {
   }
 }
 
+function bindIfExists(id, eventName, handler) {
+  const el = $(id);
+  if (el) el.addEventListener(eventName, handler);
+}
+
 function bindEvents() {
-  $('toggle-login-pass').addEventListener('click', () => {
-    $('login-password').type = $('login-password').type === 'password' ? 'text' : 'password';
+  bindIfExists('toggle-login-pass', 'click', () => {
+    if ($('login-password')) {
+      $('login-password').type = $('login-password').type === 'password' ? 'text' : 'password';
+    }
   });
 
-  $('btn-create-admin').addEventListener('click', handleCreateAdmin);
-  $('btn-login').addEventListener('click', handleLogin);
-  $('btn-logout').addEventListener('click', logout);
+  bindIfExists('btn-create-admin', 'click', handleCreateAdmin);
+  bindIfExists('btn-login', 'click', handleLogin);
+  bindIfExists('btn-logout', 'click', logout);
 
   $$('.nav-btn').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
 
-  $('btn-unlock-settings').addEventListener('click', unlockSettings);
-  $('btn-save-settings').addEventListener('click', saveConnectionSettings);
-  $('btn-test-connection').addEventListener('click', testConnection);
-  $('btn-refresh').addEventListener('click', loadEmployees);
-  $('btn-new-employee').addEventListener('click', () => openEmployeeModal());
-  $('employee-form').addEventListener('submit', saveEmployee);
-  $('btn-search-cep').addEventListener('click', searchCEP);
-  $('search-employee').addEventListener('input', renderEmployees);
-  $('filter-status').addEventListener('change', renderEmployees);
+  bindIfExists('btn-unlock-settings', 'click', unlockSettings);
+  bindIfExists('btn-save-settings', 'click', saveConnectionSettings);
+  bindIfExists('btn-test-connection', 'click', testConnection);
+  bindIfExists('btn-refresh', 'click', loadEmployees);
+  bindIfExists('btn-new-employee', 'click', () => openEmployeeModal());
 
-  $('btn-select-photo').addEventListener('click', () => $('employee-photo-file').click());
-  $('btn-camera-photo').addEventListener('click', () => $('employee-photo-camera').click());
+  const employeeForm = $('employee-form');
+  if (employeeForm) employeeForm.addEventListener('submit', saveEmployee);
 
-  $('employee-photo-file').addEventListener('change', e => {
+  bindIfExists('btn-search-cep', 'click', searchCEP);
+  bindIfExists('search-employee', 'input', renderEmployees);
+  bindIfExists('filter-status', 'change', renderEmployees);
+
+  bindIfExists('btn-select-photo', 'click', () => $('employee-photo-file')?.click());
+  bindIfExists('btn-camera-photo', 'click', () => $('employee-photo-camera')?.click());
+
+  bindIfExists('employee-photo-file', 'change', (e) => {
     state.currentPhotoFile = e.target.files[0];
     if (state.currentPhotoFile) updatePhotoPreview(URL.createObjectURL(state.currentPhotoFile));
   });
 
-  $('employee-photo-camera').addEventListener('change', e => {
+  bindIfExists('employee-photo-camera', 'change', (e) => {
     state.currentPhotoFile = e.target.files[0];
     if (state.currentPhotoFile) updatePhotoPreview(URL.createObjectURL(state.currentPhotoFile));
   });
 
-  $('btn-remove-photo').addEventListener('click', () => {
+  bindIfExists('btn-remove-photo', 'click', () => {
     state.currentPhotoFile = null;
     updatePhotoPreview('');
   });
 
   $$('.tab-btn').forEach(btn => btn.addEventListener('click', () => activateTab(btn.dataset.tab)));
 
-  $('btn-upload-document').addEventListener('click', uploadEmployeeDocument);
+  bindIfExists('btn-upload-document', 'click', uploadEmployeeDocument);
 
   $$('[data-close-modal="true"]').forEach(el => el.addEventListener('click', closeEmployeeModal));
 
-  $('btn-save-template').addEventListener('click', saveTemplateFromForm);
-  $('btn-load-default-templates').addEventListener('click', loadDefaultTemplates);
-  $('btn-render-doc').addEventListener('click', renderDocumentPreview);
-  $('btn-print-doc').addEventListener('click', printPreview);
-  $('btn-generate-employee-pdf').addEventListener('click', generateEmployeePdf);
-  $('btn-export-csv').addEventListener('click', () => exportEmployeesCsv(false));
-  $('btn-export-detailed-csv').addEventListener('click', () => exportEmployeesCsv(true));
-  $('btn-export-history-csv').addEventListener('click', exportHistoryCsv);
+  bindIfExists('btn-save-template', 'click', saveTemplateFromForm);
+  bindIfExists('btn-load-default-templates', 'click', loadDefaultTemplates);
+  bindIfExists('btn-render-doc', 'click', renderDocumentPreview);
+  bindIfExists('btn-print-doc', 'click', printPreview);
+  bindIfExists('btn-generate-employee-pdf', 'click', generateEmployeePdf);
+  bindIfExists('btn-export-csv', 'click', () => exportEmployeesCsv(false));
+  bindIfExists('btn-export-detailed-csv', 'click', () => exportEmployeesCsv(true));
+  bindIfExists('btn-export-history-csv', 'click', exportHistoryCsv);
 }
 
 function bootstrap() {
