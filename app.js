@@ -1,60 +1,59 @@
 const SUPABASE_URL = "https://xqikfrufphwaqmfuexvx.supabase.co";
 const SUPABASE_KEY = "sb_publishable__-5ZX8k6kNTwQH5dvZxvMA_xVCX7-Up";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 window.login = async function () {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const msg = document.getElementById("msg");
 
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+  if (msg) msg.innerText = "Entrando...";
 
-document.getElementById("msg").innerText = "Entrando...";
+  const { error } = await sb.auth.signInWithPassword({
+    email,
+    password
+  });
 
-const { data, error } = await supabase.auth.signInWithPassword({
-email: email,
-password: password
-});
+  if (error) {
+    if (msg) msg.innerText = error.message;
+    return;
+  }
 
-if (error) {
+  if (msg) msg.innerText = "Login realizado com sucesso.";
 
-document.getElementById("msg").innerText =
-"Erro: " + error.message;
-
-return;
-
-}
-
-document.getElementById("msg").innerText =
-"Login realizado com sucesso";
-
-document.getElementById("panel").classList.remove("hidden");
-
+  const panel = document.getElementById("panel");
+  if (panel) panel.style.display = "block";
 };
 
 window.logout = async function () {
+  await sb.auth.signOut();
 
-await supabase.auth.signOut();
+  const panel = document.getElementById("panel");
+  if (panel) panel.style.display = "none";
 
-document.getElementById("panel").classList.add("hidden");
-
+  const msg = document.getElementById("msg");
+  if (msg) msg.innerText = "Sessão encerrada.";
 };
 
 window.loadEmployees = async function () {
+  const result = document.getElementById("result");
+  if (result) result.innerText = "Carregando...";
 
-const { data, error } = await supabase
-.from("employees")
-.select("*");
+  const { data, error } = await sb
+    .from("funcionarios")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-if (error) {
+  if (error) {
+    if (result) result.innerText = error.message;
+    return;
+  }
 
-document.getElementById("result").innerText =
-error.message;
+  if (!data || data.length === 0) {
+    if (result) result.innerText = "[]";
+    return;
+  }
 
-return;
-
-}
-
-document.getElementById("result").innerText =
-JSON.stringify(data,null,2);
-
+  if (result) result.innerText = JSON.stringify(data, null, 2);
 };
