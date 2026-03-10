@@ -1,56 +1,48 @@
 const SUPABASE_URL = "https://xqikfrufphwaqmfuexvx.supabase.co";
 const SUPABASE_KEY = "sb_publishable__-5ZX8k6kNTwQH5dvZxvMA_xVCX7-Up";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function login(){
+window.login = async function () {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const msg = document.getElementById("msg");
 
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+  msg.innerText = "Entrando...";
 
-const { error } = await supabase.auth.signInWithPassword({
-email,
-password
-});
+  const { error } = await sb.auth.signInWithPassword({
+    email,
+    password
+  });
 
-if(error){
+  if (error) {
+    msg.innerText = error.message;
+    return;
+  }
 
-document.getElementById("msg").innerText = error.message;
+  msg.innerText = "Login realizado com sucesso.";
+  document.getElementById("panel").classList.remove("hidden");
+};
 
-}else{
+window.logout = async function () {
+  await sb.auth.signOut();
+  document.getElementById("panel").classList.add("hidden");
+  document.getElementById("msg").innerText = "Sessão encerrada.";
+};
 
-document.getElementById("msg").innerText = "Login realizado";
+window.loadEmployees = async function () {
+  const result = document.getElementById("result");
+  result.innerText = "Carregando...";
 
-document.getElementById("panel").classList.remove("hidden");
+  const { data, error } = await sb
+    .from("funcionarios")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-}
+  if (error) {
+    result.innerText = error.message;
+    return;
+  }
 
-}
-
-async function logout(){
-
-await supabase.auth.signOut();
-
-document.getElementById("panel").classList.add("hidden");
-
-}
-
-async function loadEmployees(){
-
-const { data, error } = await supabase
-.from("employees")
-.select("*")
-.limit(10);
-
-if(error){
-
-document.getElementById("result").innerText = error.message;
-
-}else{
-
-document.getElementById("result").innerText =
-JSON.stringify(data,null,2);
-
-}
-
-}
+  result.innerText = JSON.stringify(data, null, 2);
+};
