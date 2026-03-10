@@ -8,321 +8,140 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Empório Pet RH</h1>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">🐾</div>
+        <div>
+          <h1>Empório Pet RH</h1>
+          <p id="adminEmail">emporiopetleme@gmail.com</p>
+        </div>
+      </div>
 
-    <div class="card">
-      <h2>Login</h2>
-      <input id="email" type="email" placeholder="E-mail" />
-      <input id="password" type="password" placeholder="Senha" />
-      <button onclick="login()">Entrar</button>
-      <p id="msg"></p>
-    </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" type="button">Dashboard</button>
+        <button class="nav-link" type="button">Funcionários</button>
+        <button class="nav-link" type="button">Documentos</button>
+        <button class="nav-link" type="button">Relatórios</button>
+        <button class="nav-link" type="button">Configurações</button>
+      </nav>
 
-    <div class="card hidden" id="panel">
-      <h2>Painel</h2>
+      <button class="logout-btn" type="button" onclick="logout()">Sair</button>
+    </aside>
 
-      <h3>Cadastrar funcionário</h3>
+    <main class="content">
+      <section class="login-card" id="loginCard">
+        <img src="assets/logo.png" alt="Empório Pet" class="top-logo" />
+        <h2>Empório Pet RH</h2>
 
-      <input id="full_name" type="text" placeholder="Nome completo *" />
-      <input id="birth_date" type="date" placeholder="Data de nascimento" />
-      <input id="cpf" type="text" placeholder="CPF *" maxlength="14" />
-      <input id="rg" type="text" placeholder="RG *" maxlength="15" />
+        <div class="card">
+          <h3>Login</h3>
+          <input id="email" type="email" placeholder="E-mail" />
+          <input id="password" type="password" placeholder="Senha" />
+          <button type="button" onclick="login()">Entrar</button>
+          <p id="msg"></p>
+        </div>
+      </section>
 
-      <input id="cep" type="text" placeholder="CEP" maxlength="9" />
-      <input id="address" type="text" placeholder="Endereço" />
-      <input id="address_number" type="text" placeholder="Número" />
-      <input id="address_complement" type="text" placeholder="Complemento" />
-      <input id="neighborhood" type="text" placeholder="Bairro" />
-      <input id="city" type="text" placeholder="Cidade *" />
-      <input id="state" type="text" placeholder="UF *" maxlength="2" />
+      <section id="panel" class="dashboard hidden">
+        <div class="dashboard-header">
+          <div>
+            <h2>Dashboard RH</h2>
+            <p>Visão geral dos colaboradores e alertas</p>
+          </div>
+          <button class="secondary-btn" type="button" onclick="loadEmployees()">Atualizar dados</button>
+        </div>
 
-      <input id="phone" type="text" placeholder="Telefone" maxlength="14" />
-      <input id="mobile" type="text" placeholder="Celular" maxlength="15" />
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span>Total</span>
+            <strong id="statTotal">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Ativos</span>
+            <strong id="statActive">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Afastados</span>
+            <strong id="statAway">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Desligados</span>
+            <strong id="statOff">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Experiência vencendo</span>
+            <strong id="statTrial">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Aniversariantes do mês</span>
+            <strong id="statBirthdays">0</strong>
+          </div>
+        </div>
 
-      <input id="role" type="text" placeholder="Cargo / Função *" list="roles_list" />
-      <datalist id="roles_list"></datalist>
+        <div class="dashboard-panels">
+          <div class="panel-card">
+            <h3>Alertas</h3>
+            <div class="alert-box" id="alertsBox">Nenhum alerta no momento.</div>
+          </div>
 
-      <input id="admission_date" type="date" placeholder="Data de admissão" />
-      <input id="ctps_number" type="text" placeholder="CTPS número *" />
-      <input id="ctps_series" type="text" placeholder="CTPS série *" />
+          <div class="panel-card">
+            <h3>Últimas movimentações</h3>
+            <div id="movementsBox" class="movements-list">
+              <div class="movement-item">
+                <strong>setup_admin</strong>
+                <p>Administrador inicial configurado</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <button onclick="saveEmployee()">Salvar funcionário</button>
+        <div class="panel-card form-card">
+          <h3>Cadastrar funcionário</h3>
 
-      <p id="employeeMsg"></p>
+          <div class="form-grid">
+            <input id="full_name" type="text" placeholder="Nome completo *" />
+            <input id="birth_date" type="date" />
+            <input id="cpf" type="text" placeholder="CPF *" maxlength="14" />
+            <input id="rg" type="text" placeholder="RG *" maxlength="15" />
 
-      <hr style="margin: 24px 0;">
+            <input id="cep" type="text" placeholder="CEP" maxlength="9" />
+            <input id="address" type="text" placeholder="Endereço" />
+            <input id="address_number" type="text" placeholder="Número" />
+            <input id="address_complement" type="text" placeholder="Complemento" />
 
-      <h3>Funcionários cadastrados</h3>
-      <button onclick="loadEmployees()">Atualizar lista</button>
-      <pre id="result"></pre>
+            <input id="neighborhood" type="text" placeholder="Bairro" />
+            <input id="city" type="text" placeholder="Cidade *" />
+            <input id="state" type="text" placeholder="UF *" maxlength="2" />
+            <input id="phone" type="text" placeholder="Telefone" maxlength="14" />
 
-      <button onclick="logout()">Sair</button>
-    </div>
+            <input id="mobile" type="text" placeholder="Celular" maxlength="15" />
+            <input id="role" type="text" placeholder="Cargo / Função *" list="roles_list" />
+            <datalist id="roles_list"></datalist>
+            <input id="admission_date" type="date" />
+
+            <input id="ctps_number" type="text" placeholder="CTPS número *" />
+            <input id="ctps_series" type="text" placeholder="CTPS série *" />
+          </div>
+
+          <div class="form-actions">
+            <button type="button" onclick="saveEmployee()">Salvar funcionário</button>
+          </div>
+
+          <p id="employeeMsg"></p>
+        </div>
+
+        <div class="panel-card">
+          <div class="list-header">
+            <h3>Funcionários cadastrados</h3>
+            <button class="secondary-btn" type="button" onclick="loadEmployees()">Atualizar lista</button>
+          </div>
+          <pre id="result"></pre>
+        </div>
+      </section>
+    </main>
   </div>
 
-  <script>
-    const SUPABASE_URL = "https://xqikfrufphwaqmfuexvx.supabase.co";
-    const SUPABASE_KEY = "sb_publishable__-5ZX8k6kNTwQH5dvZxvMA_xVCX7-Up";
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    const ROLE_STORAGE_KEY = "emporio_pet_rh_roles";
-
-    function onlyDigits(value) {
-      return value.replace(/\D/g, "");
-    }
-
-    function maskCPF(value) {
-      value = onlyDigits(value).slice(0, 11);
-      value = value.replace(/^(\d{3})(\d)/, "$1.$2");
-      value = value.replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3");
-      value = value.replace(/\.(\d{3})(\d)/, ".$1-$2");
-      return value;
-    }
-
-    function validateCPF(cpf) {
-      cpf = onlyDigits(cpf);
-      if (cpf.length !== 11) return false;
-      if (/^(\d)\1+$/.test(cpf)) return false;
-
-      let sum = 0;
-      for (let i = 0; i < 9; i++) {
-        sum += parseInt(cpf.charAt(i)) * (10 - i);
-      }
-      let firstCheck = 11 - (sum % 11);
-      if (firstCheck >= 10) firstCheck = 0;
-      if (firstCheck !== parseInt(cpf.charAt(9))) return false;
-
-      sum = 0;
-      for (let i = 0; i < 10; i++) {
-        sum += parseInt(cpf.charAt(i)) * (11 - i);
-      }
-      let secondCheck = 11 - (sum % 11);
-      if (secondCheck >= 10) secondCheck = 0;
-      if (secondCheck !== parseInt(cpf.charAt(10))) return false;
-
-      return true;
-    }
-
-    function maskPhone(value) {
-      value = onlyDigits(value).slice(0, 10);
-      if (value.length <= 2) return value.replace(/^(\d{0,2})/, "($1");
-      if (value.length <= 6) return value.replace(/^(\d{2})(\d{0,4})/, "($1) $2");
-      return value.replace(/^(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
-    }
-
-    function maskMobile(value) {
-      value = onlyDigits(value).slice(0, 11);
-      if (value.length <= 2) return value.replace(/^(\d{0,2})/, "($1");
-      if (value.length <= 7) return value.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
-      return value.replace(/^(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
-    }
-
-    function maskCEP(value) {
-      value = onlyDigits(value).slice(0, 8);
-      return value.replace(/^(\d{5})(\d{0,3})$/, "$1-$2");
-    }
-
-    function maskRG(value) {
-      value = value.toUpperCase().replace(/[^0-9X.\-]/g, "");
-      return value.slice(0, 15);
-    }
-
-    function setEmployeeMessage(text, isError = false) {
-      const employeeMsg = document.getElementById("employeeMsg");
-      employeeMsg.innerText = text;
-      employeeMsg.style.color = isError ? "crimson" : "green";
-    }
-
-    function loadRoles() {
-      const roles = JSON.parse(localStorage.getItem(ROLE_STORAGE_KEY) || "[]");
-      const datalist = document.getElementById("roles_list");
-      datalist.innerHTML = "";
-      roles.forEach(role => {
-        const option = document.createElement("option");
-        option.value = role;
-        datalist.appendChild(option);
-      });
-    }
-
-    function saveRole(role) {
-      if (!role) return;
-      const roles = JSON.parse(localStorage.getItem(ROLE_STORAGE_KEY) || "[]");
-      if (!roles.includes(role)) {
-        roles.push(role);
-        roles.sort((a, b) => a.localeCompare(b, "pt-BR"));
-        localStorage.setItem(ROLE_STORAGE_KEY, JSON.stringify(roles));
-      }
-      loadRoles();
-    }
-
-    async function fetchAddressByCEP() {
-      const cepInput = document.getElementById("cep");
-      const cep = onlyDigits(cepInput.value);
-
-      if (cep.length !== 8) return;
-
-      try {
-        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        const data = await response.json();
-
-        if (data.erro) {
-          setEmployeeMessage("CEP não encontrado.", true);
-          return;
-        }
-
-        document.getElementById("address").value = data.logradouro || "";
-        document.getElementById("neighborhood").value = data.bairro || "";
-        document.getElementById("city").value = data.localidade || "";
-        document.getElementById("state").value = data.uf || "";
-        setEmployeeMessage("Endereço preenchido pelo CEP.");
-      } catch (error) {
-        setEmployeeMessage("Erro ao buscar CEP.", true);
-      }
-    }
-
-    async function login() {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      const msg = document.getElementById("msg");
-
-      msg.innerText = "Entrando...";
-
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        msg.innerText = "Erro: " + error.message;
-        return;
-      }
-
-      if (data?.session) {
-        msg.innerText = "Login realizado com sucesso";
-        document.getElementById("panel").classList.remove("hidden");
-        loadEmployees();
-      } else {
-        msg.innerText = "Login sem sessão retornada";
-      }
-    }
-
-    async function logout() {
-      await supabaseClient.auth.signOut();
-      document.getElementById("panel").classList.add("hidden");
-      document.getElementById("result").innerText = "";
-      document.getElementById("msg").innerText = "Sessão encerrada";
-    }
-
-    async function saveEmployee() {
-      const employee = {
-        full_name: document.getElementById("full_name").value.trim(),
-        birth_date: document.getElementById("birth_date").value || null,
-        cpf: document.getElementById("cpf").value.trim(),
-        rg: document.getElementById("rg").value.trim(),
-        zip_code: document.getElementById("cep").value.trim(),
-        address: document.getElementById("address").value.trim(),
-        address_number: document.getElementById("address_number").value.trim(),
-        address_complement: document.getElementById("address_complement").value.trim(),
-        neighborhood: document.getElementById("neighborhood").value.trim(),
-        city: document.getElementById("city").value.trim(),
-        state: document.getElementById("state").value.trim().toUpperCase(),
-        phone: document.getElementById("phone").value.trim(),
-        mobile: document.getElementById("mobile").value.trim(),
-        role: document.getElementById("role").value.trim(),
-        admission_date: document.getElementById("admission_date").value || null,
-        ctps_number: document.getElementById("ctps_number").value.trim(),
-        ctps_series: document.getElementById("ctps_series").value.trim()
-      };
-
-      if (!employee.full_name || !employee.rg || !employee.cpf || !employee.role || !employee.ctps_number || !employee.ctps_series || !employee.city || !employee.state) {
-        setEmployeeMessage("Preencha todos os campos obrigatórios.", true);
-        return;
-      }
-
-      if (!validateCPF(employee.cpf)) {
-        setEmployeeMessage("CPF inválido. Digite um CPF válido.", true);
-        return;
-      }
-
-      setEmployeeMessage("Salvando...", false);
-      document.getElementById("employeeMsg").style.color = "black";
-
-      const { error } = await supabaseClient
-        .from("employees")
-        .insert([employee]);
-
-      if (error) {
-        setEmployeeMessage("Erro ao salvar: " + error.message, true);
-        return;
-      }
-
-      saveRole(employee.role);
-      setEmployeeMessage("Funcionário salvo com sucesso.");
-
-      [
-        "full_name", "birth_date", "cpf", "rg", "cep", "address", "address_number",
-        "address_complement", "neighborhood", "city", "state", "phone", "mobile",
-        "role", "admission_date", "ctps_number", "ctps_series"
-      ].forEach(id => document.getElementById(id).value = "");
-
-      loadEmployees();
-    }
-
-    async function loadEmployees() {
-      const result = document.getElementById("result");
-      result.innerText = "Carregando...";
-
-      const { data, error } = await supabaseClient
-        .from("employees")
-        .select("id, full_name, cpf, rg, role, ctps_number, ctps_series, city, state, admission_date")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        result.innerText = "Erro: " + error.message;
-        return;
-      }
-
-      result.innerText = JSON.stringify(data, null, 2);
-    }
-
-    async function checkSession() {
-      const { data } = await supabaseClient.auth.getSession();
-
-      if (data?.session) {
-        document.getElementById("panel").classList.remove("hidden");
-        document.getElementById("msg").innerText = "Sessão já iniciada";
-        loadEmployees();
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      loadRoles();
-
-      document.getElementById("cpf").addEventListener("input", e => {
-        e.target.value = maskCPF(e.target.value);
-      });
-
-      document.getElementById("phone").addEventListener("input", e => {
-        e.target.value = maskPhone(e.target.value);
-      });
-
-      document.getElementById("mobile").addEventListener("input", e => {
-        e.target.value = maskMobile(e.target.value);
-      });
-
-      document.getElementById("cep").addEventListener("input", e => {
-        e.target.value = maskCEP(e.target.value);
-      });
-
-      document.getElementById("cep").addEventListener("blur", fetchAddressByCEP);
-
-      document.getElementById("rg").addEventListener("input", e => {
-        e.target.value = maskRG(e.target.value);
-      });
-
-      checkSession();
-    });
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
