@@ -34,8 +34,8 @@
         </div>
 
         <div class="auth-actions">
-          <button id="btn-login" class="primary">Entrar</button>
-          <button id="btn-create-admin" class="secondary hidden">Criar administrador</button>
+          <button id="btn-login" class="primary" type="button">Entrar</button>
+          <button id="btn-create-admin" class="secondary hidden" type="button">Criar administrador</button>
         </div>
         <p id="login-message" class="helper"></p>
       </div>
@@ -52,15 +52,15 @@
         </div>
 
         <nav class="nav-menu">
-          <button class="nav-btn active" data-view="dashboard">Dashboard</button>
-          <button class="nav-btn" data-view="employees">Funcionários</button>
-          <button class="nav-btn" data-view="documents">Documentos</button>
-          <button class="nav-btn" data-view="reports">Relatórios</button>
-          <button class="nav-btn" data-view="settings">Configurações</button>
+          <button class="nav-btn active" data-view="dashboard" type="button">Dashboard</button>
+          <button class="nav-btn" data-view="employees" type="button">Funcionários</button>
+          <button class="nav-btn" data-view="documents" type="button">Documentos</button>
+          <button class="nav-btn" data-view="reports" type="button">Relatórios</button>
+          <button class="nav-btn" data-view="settings" type="button">Configurações</button>
         </nav>
 
         <div class="sidebar-footer">
-          <button id="btn-logout" class="danger-outline">Sair</button>
+          <button id="btn-logout" class="danger-outline" type="button">Sair</button>
         </div>
       </aside>
 
@@ -72,7 +72,7 @@
               <p class="muted">Visão geral dos colaboradores e alertas</p>
             </div>
             <div class="header-actions">
-              <button id="btn-refresh" class="secondary">Atualizar dados</button>
+              <button id="btn-refresh" class="secondary" type="button">Atualizar dados</button>
             </div>
           </div>
 
@@ -104,7 +104,7 @@
               <p class="muted">Cadastro, edição, foto, status e documentos</p>
             </div>
             <div class="header-actions">
-              <button id="btn-new-employee" class="primary">Novo funcionário</button>
+              <button id="btn-new-employee" class="primary" type="button">Novo funcionário</button>
             </div>
           </div>
 
@@ -117,7 +117,7 @@
                 <option value="afastado">Afastado</option>
                 <option value="desligado">Desligado</option>
               </select>
-              <button id="btn-export-csv" class="secondary">Exportar CSV</button>
+              <button id="btn-export-csv" class="secondary" type="button">Exportar CSV</button>
             </div>
           </div>
 
@@ -140,8 +140,8 @@
                 <select id="doc-employee-select"></select>
                 <label for="doc-template-select">Modelo</label>
                 <select id="doc-template-select"></select>
-                <button id="btn-render-doc" class="secondary">Atualizar prévia</button>
-                <button id="btn-print-doc" class="primary">Imprimir</button>
+                <button id="btn-render-doc" class="secondary" type="button">Atualizar prévia</button>
+                <button id="btn-print-doc" class="primary" type="button">Imprimir</button>
               </div>
             </div>
             <div class="card">
@@ -158,8 +158,8 @@
               <label for="template-content">Conteúdo do modelo</label>
               <textarea id="template-content" rows="10" placeholder="Use variáveis como {{full_name}}, {{cpf}}, {{role}}, {{address}}, {{today}}"></textarea>
               <div class="header-actions">
-                <button id="btn-save-template" class="primary">Salvar modelo</button>
-                <button id="btn-load-default-templates" class="secondary">Carregar modelos padrão</button>
+                <button id="btn-save-template" class="primary" type="button">Salvar modelo</button>
+                <button id="btn-load-default-templates" class="secondary" type="button">Carregar modelos padrão</button>
               </div>
             </div>
             <div id="templates-list" class="list-stack mt-16"></div>
@@ -178,8 +178,8 @@
             <div class="card">
               <h3>Exportações</h3>
               <div class="list-stack">
-                <button id="btn-export-detailed-csv" class="secondary">Exportar funcionários completos (CSV)</button>
-                <button id="btn-export-history-csv" class="secondary">Exportar histórico (CSV)</button>
+                <button id="btn-export-detailed-csv" class="secondary" type="button">Exportar funcionários completos (CSV)</button>
+                <button id="btn-export-history-csv" class="secondary" type="button">Exportar histórico (CSV)</button>
               </div>
             </div>
             <div class="card">
@@ -207,7 +207,7 @@
             <div class="form-grid one-col">
               <label for="settings-password">Senha</label>
               <input id="settings-password" type="password" placeholder="Senha do administrador" />
-              <button id="btn-unlock-settings" class="primary">Desbloquear</button>
+              <button id="btn-unlock-settings" class="primary" type="button">Desbloquear</button>
               <p id="settings-message" class="helper"></p>
             </div>
           </div>
@@ -228,8 +228,8 @@
                 <input id="bucket-docs" type="text" value="employee-documents" />
 
                 <div class="header-actions">
-                  <button id="btn-save-settings" class="primary">Salvar configurações</button>
-                  <button id="btn-test-connection" class="secondary">Testar conexão</button>
+                  <button id="btn-save-settings" class="primary" type="button">Salvar configurações</button>
+                  <button id="btn-test-connection" class="secondary" type="button">Testar conexão</button>
                 </div>
                 <p id="connection-result" class="helper"></p>
               </div>
@@ -245,7 +245,7 @@
     <div class="modal-card large">
       <div class="modal-header">
         <h2 id="employee-modal-title">Novo funcionário</h2>
-        <button class="close-btn" data-close-modal="true">×</button>
+        <button class="close-btn" data-close-modal="true" type="button">×</button>
       </div>
 
       <form id="employee-form" class="modal-body">
