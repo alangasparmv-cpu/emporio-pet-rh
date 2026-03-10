@@ -6,7 +6,7 @@ const DEFAULT_TEMPLATES = [
   { name:'Contrato de experiência', content:`CONTRATO DE EXPERIÊNCIA\n\nColaborador: {{full_name}}\nCPF: {{cpf}}\nCargo: {{role}}\nData de admissão: {{hire_date}}\nPrazo de experiência: {{trial_days}} dias\n\nDeclaro estar ciente das condições do período de experiência.\n\nLeme/SP, {{today}}\n\nAssinatura do colaborador: _______________________`},
   { name:'Termo de responsabilidade', content:`TERMO DE RESPONSABILIDADE\n\nEu, {{full_name}}, CPF {{cpf}}, ocupante do cargo de {{role}}, declaro responsabilidade pelas informações prestadas e pelo uso adequado dos recursos da empresa.\n\nEndereço: {{address}}\nTelefone: {{mobile}}\n\nData: {{today}}\n\nAssinatura: __________________________________`}
 ];
-const state = { supabase:null, settingsUnlocked:false, employees:[], editingEmployee:null, currentPhotoFile:null, currentDocuments:[] };
+const state = { supabase:null, settingsUnlocked:false, employees:[], editingEmployee:null, currentPhotoFile:null, currentDocuments:[], signaturePad:null, signatureDataUrl:'' };
 const getJSON = (k, def) => JSON.parse(localStorage.getItem(k) || JSON.stringify(def));
 const setJSON = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 const hashString = (v)=>{ let h=0; for(let i=0;i<v.length;i++){ h=((h<<5)-h)+v.charCodeAt(i); h|=0; } return String(h); };
