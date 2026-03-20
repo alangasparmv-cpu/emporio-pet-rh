@@ -694,6 +694,10 @@ async function saveEmployee(event) {
   const id = $('employee-id')?.value || crypto.randomUUID();
 
   const payload = {
+    nationality: $('nationality')?.value.trim() || '',
+place_of_birth: $('place-of-birth')?.value.trim() || '',
+marital_status: $('marital-status')?.value || '',
+dependents: $('dependents')?.value.trim() || '',
     id,
     full_name: $('full-name')?.value.trim() || '',
     status: $('status')?.value || 'ativo',
