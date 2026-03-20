@@ -905,7 +905,9 @@ function renderDocumentPreview() {
   const t = getJSON(STORAGE_KEYS.templates, DEFAULT_TEMPLATES)[templateIndex] || DEFAULT_TEMPLATES[0];
 
   if (!emp || !t) {
-    if ($('doc-preview')) $('doc-preview').innerHTML = 'Selecione um funcionário e um modelo.';
+    if ($('doc-preview')) {
+      $('doc-preview').innerHTML = 'Selecione um funcionário e um modelo.';
+    }
     return;
   }
 
@@ -928,7 +930,27 @@ function renderDocumentPreview() {
     text = text.replaceAll(`{{${k}}}`, v ?? '');
   });
 
-  if ($('doc-preview')) $('doc-preview').innerHTML = text;
+  const documentoFinal = `
+    <div style="font-family:Arial; max-width:800px; margin:auto; color:#222;">
+      
+      <div style="text-align:center; margin-bottom:20px;">
+        <img src="logo.png" style="height:80px;"><br>
+        <strong>EMPÓRIO PET LEME LTDA</strong><br>
+        <span style="font-size:12px;">CNPJ: 00.000.000/0001-00</span>
+      </div>
+
+      <hr style="margin:20px 0;">
+
+      <div style="white-space:pre-line; font-size:14px;">
+        ${text}
+      </div>
+
+    </div>
+  `;
+
+  if ($('doc-preview')) {
+    $('doc-preview').innerHTML = documentoFinal;
+  }
 }
 
   if (!emp || !t) {
