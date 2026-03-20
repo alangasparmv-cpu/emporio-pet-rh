@@ -936,7 +936,7 @@ function renderDocumentPreview() {
       <div style="text-align:center; margin-bottom:20px;">
         <img src="logo.png" style="height:80px;"><br>
         <strong>EMPÓRIO PET LEME LTDA</strong><br>
-        <span style="font-size:12px;">CNPJ: 00.000.000/0001-00</span>
+        <span style="font-size:12px;">CNPJ: 21.472.292/0001-35</span>
       </div>
 
       <hr style="margin:20px 0;">
@@ -954,9 +954,27 @@ function renderDocumentPreview() {
 }
 
 function printPreview() {
-  const html = $('doc-preview')?.textContent || '';
+  const html = $('doc-preview')?.innerHTML || '';
+
   const w = window.open('', '_blank');
-  w.document.write(`<pre style="font-family:Arial,sans-serif;white-space:pre-wrap;padding:24px;line-height:1.5">${html.replaceAll('<', '&lt;')}</pre>`);
+
+  w.document.write(`
+    <html>
+      <head>
+        <title>Impressão</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+          }
+        </style>
+      </head>
+      <body>
+        ${html}
+      </body>
+    </html>
+  `);
+
   w.document.close();
   w.print();
 }
