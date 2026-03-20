@@ -949,27 +949,8 @@ function renderDocumentPreview() {
   `;
 
  
-  // 🔥 CABEÇALHO PADRÃO COM LOGO
-  const documentoFinal = `
-    <div style="font-family:Arial; max-width:800px; margin:auto; color:#222;">
-      
-      <div style="text-align:center; margin-bottom:20px;">
-        <img src="logo.png" style="height:80px;"><br>
-        <strong>EMPÓRIO PET LEME LTDA</strong><br>
-        <span style="font-size:12px;">CNPJ: 00.000.000/0001-00</span>
-      </div>
-
-      <hr style="margin:20px 0;">
-
-      <div style="white-space:pre-line; font-size:14px;">
-        ${text}
-      </div>
-
-    </div>
-  `;
-
+  
   if ($('doc-preview')) $('doc-preview').innerHTML = documentoFinal;
-}
 }
 
 function printPreview() {
