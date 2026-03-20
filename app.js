@@ -928,6 +928,33 @@ function renderDocumentPreview() {
     text = text.replaceAll(`{{${k}}}`, v ?? '');
   });
 
+  if ($('doc-preview')) $('doc-preview').innerHTML = text;
+}
+
+  if (!emp || !t) {
+    if ($('doc-preview')) $('doc-preview').innerHTML = 'Selecione um funcionário e um modelo.';
+    return;
+  }
+
+  let text = t.content;
+
+  const vars = {
+    full_name: emp.full_name || '',
+    cpf: emp.cpf || '',
+    rg: emp.rg || '',
+    role: emp.role || '',
+    sector: emp.sector || '',
+    address: employeeAddress(emp),
+    mobile: emp.mobile || '',
+    hire_date: formatDate(emp.hire_date),
+    trial_days: emp.trial_days || 90,
+    today: new Date().toLocaleDateString('pt-BR')
+  };
+
+  Object.entries(vars).forEach(([k, v]) => {
+    text = text.replaceAll(`{{${k}}}`, v ?? '');
+  });
+
   // 🔥 CABEÇALHO PADRÃO COM LOGO
   const documentoFinal = `
     <div style="font-family:Arial; max-width:800px; margin:auto; color:#222;">
