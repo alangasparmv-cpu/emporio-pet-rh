@@ -593,6 +593,10 @@ function openEmployeeModal(employee = null) {
   if (employee) {
     [
       ['full-name', 'full_name'],
+      ['nationality', 'nationality'],
+['place-of-birth', 'place_of_birth'],
+['marital-status', 'marital_status'],
+['dependents', 'dependents'],
       ['status', 'status'],
       ['cpf', 'cpf'],
       ['rg', 'rg'],
