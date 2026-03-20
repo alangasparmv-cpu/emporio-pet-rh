@@ -924,7 +924,7 @@ function renderDocumentPreview() {
   };
 
   Object.entries(vars).forEach(([k, v]) => text = text.replaceAll(`{{${k}}}`, v ?? ''));
-  if ($('doc-preview')) $('doc-preview').textContent = text;
+  if ($('doc-preview')) $('doc-preview').innerHTML = text;
 }
 
 function printPreview() {
