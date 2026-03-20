@@ -955,7 +955,7 @@ function renderDocumentPreview() {
 
   if (!emp || !t) {
     if ($('doc-preview')) $('doc-preview').innerHTML = 'Selecione um funcionário e um modelo.';
-    return;
+  
   }
 
   let text = t.content;
