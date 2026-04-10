@@ -862,11 +862,11 @@ function loadTemplatesIntoUI() {
   }
 
   if ($('templates-list')) {
-    $('templates-list').innerHTML = use.map((t, i) => `
-      <div class="list-item">
-        <strong>${t.name}</strong><br>
-        <button class="secondary mt-12" onclick="window.loadTemplateToForm(${i})">Editar modelo</button>
-      </div>
+   <div class="list-item">
+  <strong>${t.name}</strong><br>
+  <button class="secondary mt-12" onclick="window.loadTemplateToForm(${i})">Editar modelo</button>
+  <button class="secondary mt-12" onclick="excluirModelo(${i})">Excluir</button>
+</div>
     `).join('');
   }
 }
