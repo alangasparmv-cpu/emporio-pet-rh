@@ -897,7 +897,25 @@ function saveTemplateFromForm() {
   if ($('template-name')) $('template-name').value = '';
   if ($('template-content')) $('template-content').value = '';
 }
+function excluirTodosModelos() {
 
+  const confirmar = confirm("Tem certeza que deseja excluir TODOS os modelos?");
+  if (!confirmar) return;
+
+  const senha = prompt("Digite a senha para confirmar:");
+  const senhaCorreta = "1234";
+
+  if (senha !== senhaCorreta) {
+    alert("Senha incorreta!");
+    return;
+  }
+
+  setJSON(STORAGE_KEYS.templates, []);
+  loadTemplatesIntoUI();
+
+  alert("Todos os modelos foram excluídos!");
+}
+function excluirTodosModelos() {
 function renderDocumentPreview() {
   const employeeId = $('doc-employee-select')?.value || '';
   const templateIndex = $('doc-template-select')?.value || 0;
